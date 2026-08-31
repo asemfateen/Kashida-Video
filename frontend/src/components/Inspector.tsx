@@ -8,6 +8,7 @@ import { LAYER_TYPE_LABELS, ANIMATION_LABELS, EASING_LABELS, defaultBumper, ASPE
 import { CSS_EASING, waaiKeyframes, waaiOutKeyframes } from '../lib/animations'
 import { ARABIC_FONTS } from '../lib/fonts'
 import { BROADCAST_PALETTES } from '../lib/palettes'
+import { extractHarmonicPalette, type ExtractedHarmonicPalette } from '../lib/colorExtractor'
 import { Field, TextInput, NumberInput, Slider, ColorInput, Select, Segmented, Section, Button } from './ui'
 import { listAssets, uploadAsset, assetUrl, type Asset } from '../lib/api'
 import { useBackendOnline } from '../lib/useBackend'
@@ -309,6 +310,53 @@ export function Inspector({
                     </button>
                   )
                 })}
+              </div>
+            </Section>
+
+            <Section title="⚡ 1-Click Cascade Animation Stagger">
+              <div className="text-[11px] text-slate-500 mb-2">
+                Automatically stagger layer entrance delays down the timeline for broadcast motion flow.
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const layers = model.layers.filter((l) => l.type !== 'background')
+                    layers.forEach((l, idx) => {
+                      updateAnimation(l.id, { delay: Math.round(idx * 0.08 * 100) / 100, duration: 0.45, easing: 'back-out' })
+                    })
+                  }}
+                  className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 bg-white hover:border-[#1E56A0] hover:bg-blue-50/50 transition-all cursor-pointer text-center"
+                >
+                  <span className="text-xs font-bold text-slate-800">⚡ Snappy</span>
+                  <span className="text-[9px] text-slate-400 mt-0.5">+0.08s · News</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const layers = model.layers.filter((l) => l.type !== 'background')
+                    layers.forEach((l, idx) => {
+                      updateAnimation(l.id, { delay: Math.round(idx * 0.22 * 100) / 100, duration: 0.8, easing: 'ease-in-out' })
+                    })
+                  }}
+                  className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 bg-white hover:border-[#1E56A0] hover:bg-blue-50/50 transition-all cursor-pointer text-center"
+                >
+                  <span className="text-xs font-bold text-slate-800">🎬 Cinematic</span>
+                  <span className="text-[9px] text-slate-400 mt-0.5">+0.22s · Smooth</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const layers = model.layers.filter((l) => l.type !== 'background')
+                    layers.forEach((l, idx) => {
+                      updateAnimation(l.id, { delay: Math.round(idx * 0.05 * 100) / 100, duration: 0.6, easing: 'elastic' })
+                    })
+                  }}
+                  className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 bg-white hover:border-[#1E56A0] hover:bg-blue-50/50 transition-all cursor-pointer text-center"
+                >
+                  <span className="text-xs font-bold text-slate-800">🔥 Punchy</span>
+                  <span className="text-[9px] text-slate-400 mt-0.5">+0.05s · Reels</span>
+                </button>
               </div>
             </Section>
 
@@ -1539,6 +1587,8 @@ function RoundMediaEditor({ round, setMedia, updateRound }: { round: TemplateRou
   const [, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [showFraming, setShowFraming] = useState(false)
+  const [extractedPalette, setExtractedPalette] = useState<ExtractedHarmonicPalette | null>(null)
+  const [extracting, setExtracting] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const refresh = async () => {
@@ -1585,20 +1635,70 @@ function RoundMediaEditor({ round, setMedia, updateRound }: { round: TemplateRou
       </div>
 
       {media?.url && (
-        <div className="relative overflow-hidden rounded-xl border border-slate-200 shadow-2xs group">
-          {media.type === 'video' ? (
-            <video src={media.url} className="h-24 w-full object-cover" muted autoPlay loop playsInline />
-          ) : (
-            <img src={media.url} alt="background preview" className="h-24 w-full object-cover" />
-          )}
-          <button
-            type="button"
-            onClick={() => setMedia({ url: undefined })}
-            title="Remove media"
-            className="absolute top-1.5 right-1.5 rounded-lg bg-black/60 p-1 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black"
+        <div className="space-y-2">
+          <div className="relative overflow-hidden rounded-xl border border-slate-200 shadow-2xs group">
+            {media.type === 'video' ? (
+              <video src={media.url} className="h-24 w-full object-cover" muted autoPlay loop playsInline />
+            ) : (
+              <img src={media.url} alt="background preview" className="h-24 w-full object-cover" />
+            )}
+            <button
+              type="button"
+              onClick={() => setMedia({ url: undefined })}
+              title="Remove media"
+              className="absolute top-1.5 right-1.5 rounded-lg bg-black/60 p-1 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black"
+            >
+              <Trash2 size={12} aria-hidden />
+            </button>
+          </div>
+
+          <Button
+            variant="outline"
+            onClick={async () => {
+              if (!media?.url) return
+              setExtracting(true)
+              const pal = await extractHarmonicPalette(media.url)
+              setExtractedPalette(pal)
+              setExtracting(false)
+            }}
+            disabled={extracting}
+            className="w-full justify-center text-xs font-bold"
           >
-            <Trash2 size={12} aria-hidden />
-          </button>
+            <Sparkles size={13} className="text-amber-500" />
+            <span>{extracting ? 'Analyzing Colors…' : '🪄 Extract Harmonic Theme'}</span>
+          </Button>
+
+          {extractedPalette && (
+            <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white space-y-2">
+              <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <span>Harmonic Swatches</span>
+                <span className="text-[9px] text-emerald-400">✓ WCAG AAA</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                {extractedPalette.swatches.map((c, i) => (
+                  <div
+                    key={i}
+                    className="flex-1 h-7 rounded-lg shadow-inner cursor-pointer hover:scale-105 transition-transform"
+                    style={{ background: c }}
+                    title={`Click to copy: ${c}`}
+                    onClick={() => navigator.clipboard.writeText(c)}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  updateRound(round.id, {
+                    accentColor: extractedPalette.accent,
+                    backgroundColor: extractedPalette.background,
+                  })
+                }}
+                className="w-full py-1.5 rounded-lg bg-[#1E56A0] hover:bg-[#1E56A0]/90 text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+              >
+                Apply Palette to Scene
+              </button>
+            </div>
+          )}
         </div>
       )}
 

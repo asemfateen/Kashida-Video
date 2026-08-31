@@ -544,6 +544,17 @@ function innerHtml(l: Layer): string {
       }
       return `<span class="lb"><span class="lb-ar">${esc(l.labelAr ?? '')}</span><span class="lb-en">${esc(l.labelEn ?? '')}</span></span>`
     case 'shape':
+      if (l.widgetType === 'breaking_ticker') {
+        const badge = l.tickerConfig?.badgeText || l.labelAr || 'عاجل'
+        const badgeBg = l.tickerConfig?.badgeColor || '#E63946'
+        const content = l.tickerConfig?.ribbonText || textVal || 'خبر عاجل: تغطية إخبارية شاملة ومستمرة على مدار الساعة'
+        return `<div class="ticker-box" style="display:flex;align-items:center;width:100%;height:100%;overflow:hidden;background:#030712;border-radius:24px;border:1px solid rgba(255,255,255,0.2);box-shadow:0 20px 40px rgba(0,0,0,0.8);"><div class="ticker-badge" style="display:flex;align-items:center;gap:12px;padding:0 28px;height:100%;background:${badgeBg};color:#fff;font-weight:900;font-size:32px;flex-shrink:0;z-index:10;"><span style="width:12px;height:12px;border-radius:50%;background:#fff;display:inline-block;"></span><span>${esc(badge)}</span></div><div class="ticker-ribbon" style="flex:1;overflow:hidden;padding:0 24px;white-space:nowrap;font-weight:700;font-size:32px;color:#fff;"><span class="ticker-txt">${esc(content)}</span></div></div>`
+      }
+      if (l.widgetType === 'audio_waveform') {
+        const barCount = l.audioWaveform?.barCount || 24
+        const barColor = l.audioWaveform?.color || '#1E56A0'
+        return `<div class="waveform-box" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:100%;padding:16px;background:rgba(15,23,42,0.85);border-radius:24px;border:1px solid rgba(255,255,255,0.15);">${Array.from({ length: barCount }).map((_, i) => `<div class="wave-bar" style="flex:1;height:${25 + (i % 5) * 15}%;background:${barColor};border-radius:9999px;"></div>`).join('')}</div>`
+      }
       return textVal ? `<div class="shape-content" style="display:flex;align-items:center;justify-content:center;height:100%;width:100%;font-size:${l.fontSize}px;font-weight:${l.fontWeight};color:${l.color};">${esc(textVal)}</div>` : ''
     default:
       return ''

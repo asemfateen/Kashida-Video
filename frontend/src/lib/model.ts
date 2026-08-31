@@ -180,9 +180,37 @@ export interface Layer {
   glowColor?: string
   glowSpread?: number // px
   ribbonFold?: boolean // 3D folded ends for broadcast ribbons
+  // Next-Gen Creative Widgets & Features:
+  tickerConfig?: {
+    enabled: boolean
+    badgeText: string
+    badgeColor?: string
+    ribbonText: string
+    separator: string
+    speed: number // px/sec
+  }
+  audioWaveform?: {
+    enabled: boolean
+    barCount: number
+    color?: string
+    height?: number
+  }
   // background
   backgroundMedia?: BackgroundMedia
   overlayOpacity?: number // 0..1
+}
+
+export interface PipLayout {
+  enabled: boolean
+  type: 'split_50_50' | 'floating_pip'
+  secondaryMediaUrl: string
+  positionX?: number // 0..100
+  positionY?: number // 0..100
+  width?: number // 0..100
+  height?: number // px
+  borderRadius?: number
+  borderWidth?: number
+  borderColor?: string
 }
 
 // A round is one news item within a multi-round video. The template's layers
@@ -200,6 +228,7 @@ export interface TemplateRound {
   accentColor: string
   backgroundColor: string
   backgroundMedia?: BackgroundMedia
+  pipLayout?: PipLayout
   overlayOpacity: number // 0..1
   duration: number // seconds; 0 = derive from media at render time
 }

@@ -164,8 +164,8 @@ export function Segmented<T extends string>({ value, onChange, options }: { valu
   )
 }
 
-export function Button({ children, onClick, variant = 'ghost', disabled, title }: { children: ReactNode; onClick?: () => void; variant?: 'primary' | 'midnight' | 'ghost' | 'danger' | 'outline'; disabled?: boolean; title?: string }) {
-  const base = 'inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-[13px] font-semibold transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed'
+export function Button({ children, onClick, variant = 'ghost', disabled, title, className = '' }: { children: ReactNode; onClick?: () => void; variant?: 'primary' | 'midnight' | 'ghost' | 'danger' | 'outline'; disabled?: boolean; title?: string; className?: string }) {
+  const base = 'inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-[13px] font-semibold transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer'
   const variants: Record<string, string> = {
     primary: 'bg-[#1E56A0] text-white shadow-xs hover:bg-[#16437E] active:bg-[#123666]',
     midnight: 'bg-[#0B1528] text-white shadow-xs hover:bg-[#162338]',
@@ -174,7 +174,7 @@ export function Button({ children, onClick, variant = 'ghost', disabled, title }
     danger: 'bg-red-600 text-white shadow-xs hover:bg-red-700',
   }
   return (
-    <button type="button" title={title} disabled={disabled} onClick={onClick} className={`${base} ${variants[variant]}`}>
+    <button type="button" title={title} disabled={disabled} onClick={onClick} className={`${base} ${variants[variant]} ${className}`}>
       {children}
     </button>
   )

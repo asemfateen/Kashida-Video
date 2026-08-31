@@ -504,9 +504,41 @@ const LayerView = memo(function LayerView({
             </div>
           ) : null}
           {layer.widgetType === 'breaking_ticker' ? (
-            <div className="flex items-center gap-4 bg-red-600 px-6 py-2 rounded-xl font-black text-white shadow-2xl">
-              <span className="bg-white text-red-600 px-3 py-1 rounded-md text-[0.75em] uppercase font-black animate-pulse">عاجل</span>
-              <span className="text-[1.05em]">{layer.text || 'خبر عاجل'}</span>
+            <div className="flex items-center w-full overflow-hidden rounded-2xl bg-slate-950/95 border border-white/20 shadow-2xl backdrop-blur-xl h-16">
+              {/* Pulsing Category Badge */}
+              <div
+                className="flex items-center gap-2 px-5 h-full shrink-0 font-black text-white shadow-lg z-10"
+                style={{ background: layer.tickerConfig?.badgeColor || accent || '#E63946' }}
+              >
+                <span className="h-2.5 w-2.5 rounded-full bg-white animate-ping" />
+                <span className="text-[1.1em] tracking-wider uppercase">{layer.tickerConfig?.badgeText || layer.labelAr || 'عاجل'}</span>
+              </div>
+              {/* RTL Marquee Text Ribbon */}
+              <div className="relative flex-1 overflow-hidden h-full flex items-center px-4">
+                <div className="flex items-center gap-6 whitespace-nowrap text-white font-bold text-[1.1em]">
+                  <span>{layer.tickerConfig?.ribbonText || layer.text || 'خبر عاجل: تغطية إخبارية مستمرة وشاملة على مدار الساعة'}</span>
+                  <span className="text-amber-400 font-black">{layer.tickerConfig?.separator || '●'}</span>
+                  <span>{layer.tickerConfig?.ribbonText || layer.text || 'كشيدة: منصة الأخبار والتصاميم التلقائية الأكثر دقة'}</span>
+                  <span className="text-amber-400 font-black">{layer.tickerConfig?.separator || '●'}</span>
+                </div>
+              </div>
+            </div>
+          ) : layer.widgetType === 'audio_waveform' ? (
+            <div className="flex items-center justify-center gap-1.5 w-full h-full p-3 bg-slate-950/80 rounded-2xl border border-white/15 backdrop-blur-md shadow-xl">
+              {Array.from({ length: layer.audioWaveform?.barCount || 24 }).map((_, i) => {
+                const heightPct = 20 + 75 * Math.abs(Math.sin((playheadRef.current * 4) + i * 0.45))
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 rounded-full transition-all duration-75"
+                    style={{
+                      height: `${heightPct}%`,
+                      background: layer.audioWaveform?.color || accent || '#1E56A0',
+                      opacity: 0.85 + (i % 2) * 0.15,
+                    }}
+                  />
+                )
+              })}
             </div>
           ) : layer.widgetType === 'speaker_card' ? (
             <div className="flex items-center gap-4 bg-slate-950/90 backdrop-blur-md px-6 py-3 rounded-2xl border-r-4 shadow-2xl" style={{ borderColor: accent }}>
