@@ -3,8 +3,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { UploadCloud, RefreshCw, RotateCcw, AlignHorizontalJustifyCenter, AlignVerticalJustifyCenter, Copy, ChevronLeft, ChevronRight, Trash2, Play, Sparkles } from 'lucide-react'
-import type { EntranceAnimation, ExitAnimationType, EasingName, BumperExitAnimation, Layer, TemplateModel, TemplateRound, BackgroundMedia, BumperConfig } from '../lib/model'
-import { LAYER_TYPE_LABELS, ANIMATION_LABELS, EASING_LABELS, defaultBumper, ASPECT_RATIOS } from '../lib/model'
+import type { EntranceAnimation, ExitAnimationType, EasingName, Layer, TemplateModel, TemplateRound, BackgroundMedia, BumperConfig } from '../lib/model'
+import { LAYER_TYPE_LABELS, defaultBumper, ASPECT_RATIOS } from '../lib/model'
 import { CSS_EASING, waaiKeyframes, waaiOutKeyframes } from '../lib/animations'
 import { ARABIC_FONTS } from '../lib/fonts'
 import { BROADCAST_PALETTES } from '../lib/palettes'
@@ -34,7 +34,7 @@ interface Props {
   onBumperOpenChange?: (open: boolean) => void
 }
 
-// Quick entrance presets — one tap sets type + duration + easing (+ delay 0).
+// Quick entrance presets for Bumper logo
 const ANIM_PRESETS: { label: string; anim: EntranceAnimation }[] = [
   { label: 'Words Stagger', anim: { type: 'word-stagger', duration: 0.5, easing: 'ease-out', delay: 0, stagger: 0.08 } },
   { label: 'Wipe RTL', anim: { type: 'wipe-rtl', duration: 0.6, easing: 'ease-out', delay: 0 } },
@@ -49,8 +49,8 @@ const ANIM_PRESETS: { label: string; anim: EntranceAnimation }[] = [
   { label: 'None', anim: { type: 'none', duration: 0, easing: 'linear', delay: 0 } },
 ]
 
-// Quick exit presets — how the bumper logo leaves when the bumper ends.
-const OUT_PRESETS: { label: string; anim: BumperExitAnimation }[] = [
+// Quick exit presets for Bumper logo
+const OUT_PRESETS: { label: string; anim: { type: ExitAnimationType; duration: number; easing: EasingName; delay: number } }[] = [
   { label: 'Fade out', anim: { type: 'fade-out', duration: 0.5, easing: 'ease-out', delay: 0 } },
   { label: 'Slide up', anim: { type: 'slide-up', duration: 0.5, easing: 'ease-out', delay: 0 } },
   { label: 'To left', anim: { type: 'slide-left', duration: 0.5, easing: 'ease-out', delay: 0 } },
@@ -59,105 +59,45 @@ const OUT_PRESETS: { label: string; anim: BumperExitAnimation }[] = [
   { label: 'None', anim: { type: 'none', duration: 0, easing: 'linear', delay: 0 } },
 ]
 
-function AnimPresetCard({
-  preset,
-  selected,
-  onSelect,
-}: {
-  preset: { label: string; anim: EntranceAnimation }
-  selected: boolean
-  onSelect: () => void
-}) {
-  const [hovering, setHovering] = useState(false)
-  const boxRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!hovering || !boxRef.current) return
-    const el = boxRef.current
-    let keyframes: Keyframe[] = []
-    switch (preset.anim.type) {
-      case 'fade-in':
-        keyframes = [{ opacity: 0 }, { opacity: 1 }]
-        break
-      case 'slide-up':
-        keyframes = [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'translateY(0)' }]
-        break
-      case 'slide-down':
-        keyframes = [{ opacity: 0, transform: 'translateY(-12px)' }, { opacity: 1, transform: 'translateY(0)' }]
-        break
-      case 'slide-right':
-        keyframes = [{ opacity: 0, transform: 'translateX(16px)' }, { opacity: 1, transform: 'translateX(0)' }]
-        break
-      case 'zoom-in':
-        keyframes = [{ opacity: 0, transform: 'scale(0.3)' }, { opacity: 1, transform: 'scale(1)' }]
-        break
-      case 'pop-bounce':
-        keyframes = [
-          { opacity: 0, transform: 'scale(0.3)' },
-          { opacity: 1, transform: 'scale(1.2)', offset: 0.6 },
-          { transform: 'scale(0.95)', offset: 0.8 },
-          { transform: 'scale(1)', offset: 1 },
-        ]
-        break
-      case 'flip-up':
-        keyframes = [
-          { opacity: 0, transform: 'perspective(300px) rotateX(90deg)' },
-          { opacity: 1, transform: 'perspective(300px) rotateX(0deg)' },
-        ]
-        break
-      case 'blur-reveal':
-        keyframes = [
-          { opacity: 0, filter: 'blur(6px)', transform: 'scale(0.9)' },
-          { opacity: 1, filter: 'blur(0px)', transform: 'scale(1)' },
-        ]
-        break
-      case 'wipe-rtl':
-        keyframes = [
-          { clipPath: 'inset(0 0 0 100%)', opacity: 0.5 },
-          { clipPath: 'inset(0 0 0 0%)', opacity: 1 },
-        ]
-        break
-      case 'word-stagger':
-        keyframes = [
-          { opacity: 0, transform: 'translateY(8px) scale(0.9)' },
-          { opacity: 1, transform: 'translateY(0) scale(1)' },
-        ]
-        break
-      default:
-        keyframes = [{ opacity: 0 }, { opacity: 1 }]
-    }
-    const anim = el.animate(keyframes, {
-      duration: Math.max(300, (preset.anim.duration || 0.5) * 800),
-      easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
-      fill: 'both',
-    })
-    return () => anim.cancel()
-  }, [hovering, preset])
-
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
-      className={`group flex flex-col items-center justify-between rounded-xl border p-1.5 text-center transition-all cursor-pointer ${
-        selected
-          ? 'border-[#1E56A0] bg-[#1E56A0]/10 text-[#1E56A0] ring-1 ring-[#1E56A0] shadow-xs'
-          : 'border-slate-200/90 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50/40 hover:text-slate-900'
-      }`}
-    >
-      <div className="flex h-6 w-full items-center justify-center overflow-hidden rounded-md bg-slate-100 mb-1">
-        <div
-          ref={boxRef}
-          className={`h-2.5 w-6 rounded-xs shadow-2xs transition-transform ${
-            selected ? 'bg-[#1E56A0]' : 'bg-slate-400 group-hover:bg-[#1E56A0]'
-          }`}
-        />
-      </div>
-      <span className="text-[10px] font-bold tracking-tight line-clamp-1">{preset.label}</span>
-    </button>
-  )
+// Unified Motion Presets — One tap sets entrance, easing, duration AND exit transitions!
+interface UnifiedMotionPreset {
+  id: string
+  label: string
+  nameAr: string
+  icon: string
+  inType: EntranceAnimation['type']
+  inDuration: number
+  inEasing: EasingName
+  outType: ExitAnimationType
+  outDuration: number
+  outEasing: EasingName
 }
+
+const UNIFIED_MOTION_PRESETS: UnifiedMotionPreset[] = [
+  { id: 'none', label: 'Static', nameAr: 'ثابت', icon: '⏹', inType: 'none', inDuration: 0, inEasing: 'linear', outType: 'none', outDuration: 0, outEasing: 'linear' },
+  { id: 'snappy', label: 'Snappy News', nameAr: 'سريع', icon: '⚡', inType: 'slide-up', inDuration: 0.4, inEasing: 'back-out', outType: 'fade-out', outDuration: 0.35, outEasing: 'ease-out' },
+  { id: 'wipe', label: 'Wipe RTL', nameAr: 'مسح إخباري', icon: '👉', inType: 'wipe-rtl', inDuration: 0.5, inEasing: 'ease-out', outType: 'slide-left', outDuration: 0.4, outEasing: 'ease-out' },
+  { id: 'words', label: 'Words Pop', nameAr: 'كلمة بكلمة', icon: '🔥', inType: 'word-stagger', inDuration: 0.45, inEasing: 'ease-out', outType: 'fade-out', outDuration: 0.35, outEasing: 'ease-out' },
+  { id: 'blur', label: 'Cinematic', nameAr: 'سينمائي', icon: '🎬', inType: 'blur-reveal', inDuration: 0.7, inEasing: 'ease-in-out', outType: 'blur-out', outDuration: 0.5, outEasing: 'ease-in-out' },
+  { id: 'flip', label: '3D Flip', nameAr: 'ثلاثي أبعاد', icon: '💥', inType: 'flip-up', inDuration: 0.6, inEasing: 'spring', outType: 'flip-down', outDuration: 0.4, outEasing: 'ease-out' },
+]
+
+// 1-Click Quick Style Pills
+interface QuickStylePill {
+  id: string
+  label: string
+  color: string
+  backgroundColor?: string
+  textShadow?: string
+  borderRadius?: number
+}
+
+const QUICK_STYLE_PILLS: QuickStylePill[] = [
+  { id: 'white', label: '✨ Clean White', color: '#ffffff', backgroundColor: undefined, textShadow: 'subtle' },
+  { id: 'breaking', label: '🔴 Breaking Red', color: '#ffffff', backgroundColor: '#E63946', textShadow: 'none', borderRadius: 16 },
+  { id: 'gold', label: '🟡 Gold News', color: '#FBBF24', backgroundColor: undefined, textShadow: 'glow' },
+  { id: 'glass', label: '🧊 Frosted Glass', color: '#ffffff', backgroundColor: 'rgba(15,23,42,0.85)', textShadow: 'none', borderRadius: 20 },
+]
 
 export function Inspector({
   model,
@@ -534,392 +474,69 @@ export function Inspector({
 
       <ContentEditor layer={layer} updateLayer={updateLayer} activeRound={activeRound} updateRound={updateRound} />
 
-      <Section title="Position & size">
-        <div className="space-y-2.5">
-          {layer.type !== 'background' && (
-            <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-2 space-y-1.5">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Quick Alignment & Tools</span>
-              <div className="grid grid-cols-3 gap-1.5">
-                <button
-                  type="button"
-                  disabled={layer.locked}
-                  onClick={() => alignLayerH ? alignLayerH(layer.id) : updateLayer(layer.id, { x: layer.width && layer.width > 0 ? Math.max(0, Math.min(100, Math.round((100 - layer.width) / 2))) : 50 })}
-                  title={layer.locked ? 'Layer is locked' : 'Center layer horizontally'}
-                  className="flex items-center justify-center gap-1 rounded-lg border border-slate-200/80 bg-white px-2 py-1.5 text-[11px] font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-[#1E56A0]/40 hover:text-[#1E56A0] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                >
-                  <AlignHorizontalJustifyCenter size={12} className="text-slate-400" aria-hidden />
-                  <span>Center H</span>
-                </button>
-                <button
-                  type="button"
-                  disabled={layer.locked}
-                  onClick={() => alignLayerV ? alignLayerV(layer.id) : updateLayer(layer.id, { y: 50 })}
-                  title={layer.locked ? 'Layer is locked' : 'Center layer vertically'}
-                  className="flex items-center justify-center gap-1 rounded-lg border border-slate-200/80 bg-white px-2 py-1.5 text-[11px] font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-[#1E56A0]/40 hover:text-[#1E56A0] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                >
-                  <AlignVerticalJustifyCenter size={12} className="text-slate-400" aria-hidden />
-                  <span>Center V</span>
-                </button>
-                {duplicateLayer && (
+      {/* Primary Appearance Section */}
+      {layer.type !== 'background' && layer.type !== 'accentBar' && (
+        <Section title="Appearance">
+          <div className="space-y-3">
+            {/* Quick 1-Click Visual Style Pills */}
+            <div className="space-y-1.5">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400">1-Click Style Presets</span>
+              <div className="grid grid-cols-2 gap-1.5">
+                {QUICK_STYLE_PILLS.map((p) => (
                   <button
+                    key={p.id}
                     type="button"
-                    onClick={() => duplicateLayer(layer.id)}
-                    title="Duplicate layer (Ctrl+D)"
-                    className="flex items-center justify-center gap-1 rounded-lg border border-slate-200/80 bg-white px-2 py-1.5 text-[11px] font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-[#1E56A0]/40 hover:text-[#1E56A0] transition-all"
+                    onClick={() => {
+                      updateLayer(layer.id, {
+                        color: p.color,
+                        backgroundColor: p.backgroundColor,
+                        textShadow: p.textShadow as any,
+                        borderRadius: p.borderRadius ?? layer.borderRadius,
+                      })
+                    }}
+                    className="flex items-center justify-center p-2 rounded-xl border border-slate-200 bg-white hover:border-[#1E56A0] hover:bg-blue-50/50 text-[11px] font-bold text-slate-800 transition-all cursor-pointer shadow-2xs"
                   >
-                    <Copy size={12} className="text-slate-400" aria-hidden />
-                    <span>Duplicate</span>
+                    {p.label}
                   </button>
-                )}
+                ))}
               </div>
             </div>
-          )}
-          <Slider label="Left" value={layer.x} onChange={(v) => updateLayer(layer.id, { x: v })} min={0} max={100} unit="%" />
-          <Slider label="Top" value={layer.y} onChange={(v) => updateLayer(layer.id, { y: v })} min={0} max={100} unit="%" />
-          <Slider label="Width" value={layer.width} onChange={(v) => updateLayer(layer.id, { width: v })} min={0} max={100} unit="%" />
-          <Field label="Align">
-            <Segmented
-              value={layer.textAlign}
-              onChange={(v) => updateLayer(layer.id, { textAlign: v })}
-              options={[
-                { value: 'start', label: 'Right' },
-                { value: 'center', label: 'Center' },
-                { value: 'end', label: 'Left' },
-              ]}
-            />
-          </Field>
-          <Field label="Opacity">
-            <Slider value={layer.opacity} onChange={(v) => updateLayer(layer.id, { opacity: v })} min={0} max={1} step={0.05} />
-          </Field>
-        </div>
-      </Section>
 
-      {/* Canva Shape & Object Deformation Studio */}
-      {layer.type === 'shape' && (
-        <Section title="Canva Shape Studio & Bending">
-          <div className="space-y-3.5">
-            <Field label="Shape Preset">
-              <div className="grid grid-cols-4 gap-1.5">
-                {[
-                  { type: 'rounded-box', label: 'Card' },
-                  { type: 'box', label: 'Square' },
-                  { type: 'pill', label: 'Pill' },
-                  { type: 'circle', label: 'Circle' },
-                  { type: 'ribbon', label: 'Ribbon' },
-                  { type: 'skewed-banner', label: 'Slanted' },
-                  { type: 'speech-bubble', label: 'Bubble' },
-                  { type: 'diagonal-badge', label: 'Diagonal' },
-                ].map((s) => {
-                  const active = (layer.shapeType || 'rounded-box') === s.type
-                  return (
-                    <button
-                      key={s.type}
-                      type="button"
-                      onClick={() => {
-                        const patch: Partial<Layer> = { shapeType: s.type as any }
-                        if (s.type === 'skewed-banner' && !layer.skewX) patch.skewX = -12
-                        if (s.type === 'circle') { patch.borderRadius = 9999; patch.height = 200; patch.width = 20 }
-                        updateLayer(layer.id, patch)
-                      }}
-                      className={`rounded-xl py-2 px-1 text-[11px] font-bold transition-all cursor-pointer ${
-                        active
-                          ? 'bg-[#1E56A0] text-white shadow-xs'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      {s.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </Field>
-
-            {/* Canva Slant / Bending Controls */}
-            <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-3 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                  <Sparkles size={13} className="text-[#1E56A0]" />
-                  <span>Canva Bending & Slant</span>
-                </span>
-                {(layer.skewX || layer.skewY || layer.rotation) ? (
-                  <button
-                    type="button"
-                    onClick={() => updateLayer(layer.id, { skewX: 0, skewY: 0, rotation: 0 })}
-                    className="text-[10px] font-bold text-[#1E56A0] hover:underline cursor-pointer"
-                  >
-                    Reset Transforms
-                  </button>
-                ) : null}
-              </div>
-
-              <Field label={`Horizontal Slant / Bend X (${layer.skewX || 0}°)`}>
-                <Slider
-                  value={layer.skewX || 0}
-                  onChange={(v) => updateLayer(layer.id, { skewX: Math.round(v) })}
-                  min={-60}
-                  max={60}
-                  unit="°"
-                />
-              </Field>
-
-              <Field label={`Vertical Slant / Bend Y (${layer.skewY || 0}°)`}>
-                <Slider
-                  value={layer.skewY || 0}
-                  onChange={(v) => updateLayer(layer.id, { skewY: Math.round(v) })}
-                  min={-60}
-                  max={60}
-                  unit="°"
-                />
-              </Field>
-
-              <Field label={`Rotation Angle (${layer.rotation || 0}°)`}>
-                <Slider
-                  value={layer.rotation || 0}
-                  onChange={(v) => updateLayer(layer.id, { rotation: Math.round(v) })}
-                  min={-180}
-                  max={180}
-                  unit="°"
-                />
-                <div className="flex gap-1.5 mt-1.5">
-                  {[0, 45, 90, -45].map((ang) => (
-                    <button
-                      key={ang}
-                      type="button"
-                      onClick={() => updateLayer(layer.id, { rotation: ang })}
-                      className={`flex-1 py-1 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${
-                        (layer.rotation || 0) === ang
-                          ? 'border-[#1E56A0] bg-blue-50 text-[#1E56A0]'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      {ang}°
-                    </button>
-                  ))}
-                </div>
-              </Field>
-            </div>
-
-            {/* Dimensions */}
             <div className="grid grid-cols-2 gap-2">
-              <Field label="Height (px)">
-                <NumberInput
-                  value={layer.height || 180}
-                  onChange={(v) => updateLayer(layer.id, { height: clamp(v, 20, 1920) })}
-                  min={20}
-                  max={1920}
-                  unit="px"
-                />
-              </Field>
-              <Field label="Corner Radius (px)">
-                <NumberInput
-                  value={layer.borderRadius ?? 20}
-                  onChange={(v) => updateLayer(layer.id, { borderRadius: clamp(v, 0, 200) })}
-                  min={0}
-                  max={200}
-                  unit="px"
-                />
-              </Field>
-            </div>
-
-            {/* Fill & Color Mode */}
-            <Field label="Fill Mode">
-              <Segmented
-                value={layer.fillType || 'gradient'}
-                onChange={(v) => updateLayer(layer.id, { fillType: v as any })}
-                options={[
-                  { value: 'solid', label: 'Solid' },
-                  { value: 'gradient', label: 'Gradient' },
-                  { value: 'glass', label: 'Glass' },
-                ]}
-              />
-            </Field>
-
-            {layer.fillType === 'solid' && (
-              <ColorInput
-                label="Fill Color"
-                value={layer.backgroundColor || '#1E56A0'}
-                onChange={(v) => updateLayer(layer.id, { backgroundColor: v })}
-              />
-            )}
-
-            {(layer.fillType === 'gradient' || !layer.fillType) && (
-              <div className="space-y-2 rounded-xl border border-slate-100 bg-slate-50 p-2.5">
-                <Field label={`Gradient Angle (${layer.gradientAngle ?? 135}°)`}>
-                  <Slider
-                    value={layer.gradientAngle ?? 135}
-                    onChange={(v) => updateLayer(layer.id, { gradientAngle: Math.round(v) })}
-                    min={0}
-                    max={360}
-                    unit="°"
-                  />
-                </Field>
-                <div className="grid grid-cols-2 gap-2">
-                  <ColorInput
-                    label="Start Color"
-                    value={layer.gradientColorStart || '#1E56A0'}
-                    onChange={(v) => updateLayer(layer.id, { gradientColorStart: v })}
-                  />
-                  <ColorInput
-                    label="End Color"
-                    value={layer.gradientColorEnd || '#E63946'}
-                    onChange={(v) => updateLayer(layer.id, { gradientColorEnd: v })}
-                  />
-                </div>
-              </div>
-            )}
-
-            {layer.fillType === 'glass' && (
-              <div className="space-y-2 rounded-xl border border-slate-100 bg-slate-50 p-2.5">
-                <ColorInput
-                  label="Tint Color"
-                  value={layer.backgroundColor || 'rgba(15,23,42,0.75)'}
-                  onChange={(v) => updateLayer(layer.id, { backgroundColor: v })}
-                />
-                <Field label={`Frosted Blur (${layer.backdropBlur || 16}px)`}>
-                  <Slider
-                    value={layer.backdropBlur || 16}
-                    onChange={(v) => updateLayer(layer.id, { backdropBlur: Math.round(v) })}
-                    min={0}
-                    max={40}
-                    unit="px"
-                  />
-                </Field>
-              </div>
-            )}
-
-            {/* Border & Stroke */}
-            <div className="space-y-2 rounded-xl border border-slate-100 bg-slate-50 p-2.5">
-              <span className="text-xs font-bold text-slate-700">Border & Stroke</span>
-              <div className="grid grid-cols-2 gap-2">
-                <Field label="Stroke (px)">
-                  <NumberInput
-                    value={layer.strokeWidth || 0}
-                    onChange={(v) => updateLayer(layer.id, { strokeWidth: clamp(v, 0, 30) })}
-                    min={0}
-                    max={30}
-                    unit="px"
-                  />
-                </Field>
-                <ColorInput
-                  label="Border Color"
-                  value={layer.strokeColor || '#ffffff'}
-                  onChange={(v) => updateLayer(layer.id, { strokeColor: v })}
-                />
-              </div>
-            </div>
-
-            {/* Shadows & Glow */}
-            <div className="space-y-2 rounded-xl border border-slate-100 bg-slate-50 p-2.5">
-              <span className="text-xs font-bold text-slate-700">Shadows & Outer Glow</span>
-              <Field label={`Drop Shadow Blur (${layer.shadowBlur || 0}px)`}>
-                <Slider
-                  value={layer.shadowBlur || 0}
-                  onChange={(v) => updateLayer(layer.id, { shadowBlur: Math.round(v) })}
-                  min={0}
-                  max={60}
-                  unit="px"
-                />
-              </Field>
-              <Field label={`Outer Neon Glow Spread (${layer.glowSpread || 0}px)`}>
-                <Slider
-                  value={layer.glowSpread || 0}
-                  onChange={(v) => updateLayer(layer.id, { glowSpread: Math.round(v) })}
-                  min={0}
-                  max={50}
-                  unit="px"
-                />
-              </Field>
-            </div>
-
-            {/* Text Content inside Shape */}
-            <Field label="Text / Label (Optional)">
-              <TextInput
-                value={layer.text || ''}
-                onChange={(v) => updateLayer(layer.id, { text: v })}
-                placeholder="Shape text..."
-              />
-            </Field>
-          </div>
-        </Section>
-      )}
-
-      <Section title="Appearance">
-        <div className="space-y-3">
-          {layer.type !== 'background' && layer.type !== 'accentBar' && layer.type !== 'shape' && (
-            <>
-              <Field label="Font size">
+              <Field label="Font Size">
                 <NumberInput value={layer.fontSize} onChange={(v) => updateLayer(layer.id, { fontSize: clamp(v, 8, 400) })} min={8} max={400} unit="px" />
               </Field>
-              <Field label="Font weight">
+              <ColorInput label="Color" value={layer.color || '#ffffff'} onChange={(v) => updateLayer(layer.id, { color: v })} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="Font Weight">
                 <Segmented
                   value={String(layer.fontWeight)}
                   onChange={(v) => updateLayer(layer.id, { fontWeight: Number(v) })}
                   options={[
                     { value: '400', label: 'Regular' },
-                    { value: '500', label: 'Medium' },
                     { value: '700', label: 'Bold' },
                   ]}
                 />
               </Field>
-              <Field label="Arabic Font Family">
+              <Field label="Font Family">
                 <Select
                   value={layer.fontFamily || ARABIC_FONTS[0].family}
                   onChange={(v) => updateLayer(layer.id, { fontFamily: v })}
                   options={ARABIC_FONTS.map((f) => ({ value: f.family, label: f.name }))}
                 />
               </Field>
-              <Field label={`Kashida Tatweel (محاذاة الكشيدة) — ${layer.kashida || 0}%`}>
-                <Slider
-                  value={layer.kashida || 0}
-                  onChange={(v) => updateLayer(layer.id, { kashida: Math.round(v) })}
-                  min={0}
-                  max={100}
-                  step={5}
-                  unit="%"
-                />
-              </Field>
-              <Field label="Text Shadow Effect">
-                <Segmented
-                  value={layer.textShadow || 'none'}
-                  onChange={(v) => updateLayer(layer.id, { textShadow: v })}
-                  options={[
-                    { value: 'none', label: 'None' },
-                    { value: 'subtle', label: 'Subtle' },
-                    { value: 'glow', label: 'Glow' },
-                    { value: '3d', label: '3D Hard' },
-                  ]}
-                />
-              </Field>
-              <Field label="Broadcast Widget Preset">
-                <Select
-                  value={layer.widgetType || 'custom'}
-                  onChange={(v) => updateLayer(layer.id, { widgetType: v === 'custom' ? undefined : v })}
-                  options={[
-                    { value: 'custom', label: 'Standard Layer' },
-                    { value: 'breaking_ticker', label: 'Breaking News Ticker (شريط عاجل)' },
-                    { value: 'speaker_card', label: 'Speaker Quote Box (بطاقة تصريح)' },
-                    { value: 'progress_bar', label: 'Video Progress Line (شريط تقدم)' },
-                  ]}
-                />
-              </Field>
-              <ColorInput label="Color" value={layer.color} onChange={(v) => updateLayer(layer.id, { color: v })} />
-            </>
-          )}
-          {(layer.type === 'label' || layer.type === 'accentBar') && (
-            <ColorInput label="Fill" value={layer.backgroundColor ?? model.accentColor} onChange={(v) => updateLayer(layer.id, { backgroundColor: v })} />
-          )}
-          {layer.type === 'accentBar' && (
-            <Field label="Height">
-              <NumberInput value={layer.height ?? model.height} onChange={(v) => updateLayer(layer.id, { height: clamp(v, 10, model.height) })} min={10} max={model.height} unit="px" />
-            </Field>
-          )}
-        </div>
-      </Section>
+            </div>
+          </div>
+        </Section>
+      )}
 
-      <Section title="Animation">
+      {/* Unified Motion / Animation Section (Canva-Simple 1-Click Presets) */}
+      <Section title="Motion Style (الحركة والتحريك)">
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Presets</span>
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Choose Style</span>
             {layer.animation.type !== 'none' && (
               <button
                 type="button"
@@ -941,133 +558,150 @@ export function Inspector({
               </button>
             )}
           </div>
-          <div className="grid grid-cols-3 gap-1.5">
-            {ANIM_PRESETS.map((p) => (
-              <AnimPresetCard
-                key={p.label}
-                preset={p}
-                selected={layer.animation.type === p.anim.type && layer.animation.duration === p.anim.duration}
-                onSelect={() => updateAnimation(layer.id, p.anim)}
-              />
-            ))}
+
+          {/* 6 Unified Motion Style Cards */}
+          <div className="grid grid-cols-3 gap-2">
+            {UNIFIED_MOTION_PRESETS.map((m) => {
+              const active = layer.animation.type === m.inType
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => {
+                    updateAnimation(layer.id, {
+                      type: m.inType,
+                      duration: m.inDuration,
+                      easing: m.inEasing,
+                      delay: layer.animation.delay,
+                      stagger: m.inType === 'word-stagger' ? 0.08 : undefined,
+                    })
+                    updateLayer(layer.id, {
+                      animationOut: {
+                        type: m.outType,
+                        duration: m.outDuration,
+                        delay: layer.animationOut?.delay ?? 0.4,
+                        easing: m.outEasing,
+                      },
+                    })
+                  }}
+                  className={`flex flex-col items-center justify-center p-2.5 rounded-2xl border transition-all cursor-pointer text-center ${
+                    active
+                      ? 'border-[#1E56A0] bg-blue-50/80 text-[#1E56A0] shadow-sm ring-2 ring-[#1E56A0]/20'
+                      : 'border-slate-200/80 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className="text-base">{m.icon}</span>
+                  <span className="text-[11px] font-bold mt-1 line-clamp-1">{m.label}</span>
+                  <span className={`text-[9px] mt-0.5 ${active ? 'text-[#1E56A0]/80' : 'text-slate-400'}`}>{m.nameAr}</span>
+                </button>
+              )
+            })}
           </div>
-          <Field label="Entrance">
-            <Select
-              value={layer.animation.type}
-              onChange={(v) => updateAnimation(layer.id, { type: v as EntranceAnimation['type'] })}
-              options={Object.entries(ANIMATION_LABELS).map(([value, label]) => ({ value, label }))}
-            />
-          </Field>
-          {layer.animation.type !== 'none' && (
-            <>
-              <Field label="Easing">
-                <Select
-                  value={layer.animation.easing}
-                  onChange={(v) => updateAnimation(layer.id, { easing: v as EntranceAnimation['easing'] })}
-                  options={Object.entries(EASING_LABELS).map(([value, label]) => ({ value, label }))}
-                />
-              </Field>
-              <Field label="Duration">
-                <Slider value={layer.animation.duration} onChange={(v) => updateAnimation(layer.id, { duration: v })} min={0.2} max={3} step={0.1} unit="s" />
-              </Field>
-              <Field label="Delay">
-                <Slider value={layer.animation.delay} onChange={(v) => updateAnimation(layer.id, { delay: v })} min={0} max={5} step={0.1} unit="s" />
-              </Field>
-              {layer.animation.type === 'word-stagger' && (
-                <Field label="Word Stagger (delay between words)">
-                  <Slider value={layer.animation.stagger ?? 0.08} onChange={(v) => updateAnimation(layer.id, { stagger: v })} min={0.02} max={0.3} step={0.01} unit="s" />
-                </Field>
-              )}
-              {(layer.type === 'logo' || layer.type === 'accentBar' || layer.type === 'footer') && (
-                <label className="flex items-center gap-2 pt-1 text-xs font-semibold text-slate-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={layer.animateFirstRoundOnly ?? true}
-                    onChange={(e) => updateLayer(layer.id, { animateFirstRoundOnly: e.target.checked })}
-                    className="rounded border-slate-300 text-[#1E56A0] focus:ring-[#1E56A0]"
-                  />
-                  <span>Animate in First Round only (stays steady in next rounds)</span>
-                </label>
-              )}
-            </>
+        </div>
+      </Section>
+
+      {/* ⚙️ Advanced Controls (Collapsed by Default — For Power Users) */}
+      <Section title="⚙️ Advanced Controls (خيارات متقدمة)" defaultOpen={false}>
+        <div className="space-y-4 pt-1">
+          {/* Alignment & Tools */}
+          {layer.type !== 'background' && (
+            <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-2.5 space-y-2">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Alignment & Duplicate</span>
+              <div className="grid grid-cols-3 gap-1.5">
+                <button
+                  type="button"
+                  disabled={layer.locked}
+                  onClick={() => alignLayerH ? alignLayerH(layer.id) : updateLayer(layer.id, { x: layer.width && layer.width > 0 ? Math.max(0, Math.min(100, Math.round((100 - layer.width) / 2))) : 50 })}
+                  className="flex items-center justify-center gap-1 rounded-lg border border-slate-200/80 bg-white px-2 py-1.5 text-[11px] font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-[#1E56A0] transition-all"
+                >
+                  <AlignHorizontalJustifyCenter size={12} />
+                  <span>Center H</span>
+                </button>
+                <button
+                  type="button"
+                  disabled={layer.locked}
+                  onClick={() => alignLayerV ? alignLayerV(layer.id) : updateLayer(layer.id, { y: 50 })}
+                  className="flex items-center justify-center gap-1 rounded-lg border border-slate-200/80 bg-white px-2 py-1.5 text-[11px] font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-[#1E56A0] transition-all"
+                >
+                  <AlignVerticalJustifyCenter size={12} />
+                  <span>Center V</span>
+                </button>
+                {duplicateLayer && (
+                  <button
+                    type="button"
+                    onClick={() => duplicateLayer(layer.id)}
+                    className="flex items-center justify-center gap-1 rounded-lg border border-slate-200/80 bg-white px-2 py-1.5 text-[11px] font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-[#1E56A0] transition-all"
+                  >
+                    <Copy size={12} />
+                    <span>Duplicate</span>
+                  </button>
+                )}
+              </div>
+            </div>
           )}
 
-          {/* Exit Transition / Animation Out */}
-          <div className="pt-3 mt-3 border-t border-slate-200/70 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[12px] font-bold text-slate-700">Exit Transition (Out)</span>
-              <span className="text-[10px] text-slate-400 font-semibold">Plays near end of scene</span>
-            </div>
-            <Field label="Exit Type">
-              <Select
-                value={layer.animationOut?.type ?? 'none'}
+          {/* Position & Size Sliders */}
+          <div className="space-y-2">
+            <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Position & Dimensions</span>
+            <Slider label="Left Position" value={layer.x} onChange={(v) => updateLayer(layer.id, { x: v })} min={0} max={100} unit="%" />
+            <Slider label="Top Position" value={layer.y} onChange={(v) => updateLayer(layer.id, { y: v })} min={0} max={100} unit="%" />
+            <Slider label="Width" value={layer.width} onChange={(v) => updateLayer(layer.id, { width: v })} min={0} max={100} unit="%" />
+            <Slider label="Opacity" value={layer.opacity} onChange={(v) => updateLayer(layer.id, { opacity: v })} min={0} max={1} step={0.05} />
+            <Field label="Text Alignment">
+              <Segmented
+                value={layer.textAlign}
+                onChange={(v) => updateLayer(layer.id, { textAlign: v })}
+                options={[
+                  { value: 'start', label: 'Right' },
+                  { value: 'center', label: 'Center' },
+                  { value: 'end', label: 'Left' },
+                ]}
+              />
+            </Field>
+          </div>
+
+          {/* Arabic Kashida Tatweel */}
+          <div className="space-y-2">
+            <Field label={`Kashida Tatweel (محاذاة الكشيدة) — ${layer.kashida || 0}%`}>
+              <Slider
+                value={layer.kashida || 0}
+                onChange={(v) => updateLayer(layer.id, { kashida: Math.round(v) })}
+                min={0}
+                max={100}
+                step={5}
+                unit="%"
+              />
+            </Field>
+          </div>
+
+          {/* Fine-Tuning Timing Sliders */}
+          <div className="space-y-2.5 pt-2 border-t border-slate-200/60">
+            <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Fine-Tuning Motion Timings</span>
+            <Field label="Entrance Duration">
+              <Slider value={layer.animation.duration} onChange={(v) => updateAnimation(layer.id, { duration: v })} min={0.2} max={3} step={0.1} unit="s" />
+            </Field>
+            <Field label="Entrance Delay">
+              <Slider value={layer.animation.delay} onChange={(v) => updateAnimation(layer.id, { delay: v })} min={0} max={5} step={0.1} unit="s" />
+            </Field>
+            <Field label="Exit Duration">
+              <Slider
+                value={layer.animationOut?.duration ?? 0.5}
                 onChange={(v) =>
                   updateLayer(layer.id, {
                     animationOut: {
-                      type: v as ExitAnimationType,
-                      duration: layer.animationOut?.duration ?? 0.5,
+                      type: layer.animationOut?.type ?? 'fade-out',
+                      duration: v,
                       delay: layer.animationOut?.delay ?? 0.4,
                       easing: layer.animationOut?.easing ?? 'ease-out',
                     },
                   })
                 }
-                options={[
-                  { value: 'none', label: 'None (Stay until cut)' },
-                  { value: 'fade-out', label: 'Fade Out' },
-                  { value: 'slide-down', label: 'Slide Down Out' },
-                  { value: 'slide-up', label: 'Slide Up Out' },
-                  { value: 'slide-left', label: 'Slide Left Out' },
-                  { value: 'slide-right', label: 'Slide Right Out' },
-                  { value: 'zoom-out', label: 'Zoom Out' },
-                  { value: 'pop-out', label: 'Pop Scale Out' },
-                  { value: 'blur-out', label: 'Blur Dissolve Out' },
-                  { value: 'flip-down', label: '3D Flip Down Out' },
-                ]}
+                min={0.2}
+                max={2}
+                step={0.1}
+                unit="s"
               />
             </Field>
-            {layer.animationOut && layer.animationOut.type !== 'none' && (
-              <>
-                <Field label="Exit Duration">
-                  <Slider
-                    value={layer.animationOut.duration}
-                    onChange={(v) =>
-                      updateLayer(layer.id, {
-                        animationOut: { ...layer.animationOut!, duration: v },
-                      })
-                    }
-                    min={0.2}
-                    max={2}
-                    step={0.1}
-                    unit="s"
-                  />
-                </Field>
-                <Field label="Exit Timing (offset from end)">
-                  <Slider
-                    value={layer.animationOut.delay}
-                    onChange={(v) =>
-                      updateLayer(layer.id, {
-                        animationOut: { ...layer.animationOut!, delay: v },
-                      })
-                    }
-                    min={0}
-                    max={3}
-                    step={0.1}
-                    unit="s"
-                  />
-                </Field>
-                <Field label="Exit Easing">
-                  <Select
-                    value={layer.animationOut.easing}
-                    onChange={(v) =>
-                      updateLayer(layer.id, {
-                        animationOut: { ...layer.animationOut!, easing: v as EasingName },
-                      })
-                    }
-                    options={Object.entries(EASING_LABELS).map(([value, label]) => ({ value, label }))}
-                  />
-                </Field>
-              </>
-            )}
           </div>
         </div>
       </Section>
