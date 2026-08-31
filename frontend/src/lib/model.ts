@@ -20,10 +20,14 @@ export type ShapeType =
   | 'pill' // stadium / pill capsule
   | 'circle' // circle / ellipse
   | 'ribbon' // broadcast news ribbon with folded 3D ends
+  | 'banner' // broadcast flag banner
   | 'skewed-banner' // slanted / bent news ticker bar
   | 'diagonal-badge' // corner banner
   | 'speech-bubble' // callout with tail
   | 'star' // multi-point star
+  | 'triangle' // geometric triangle
+  | 'hexagon' // geometric hexagon
+  | 'arrow' // directional arrow
   | 'bracket' // frame bracket
 
 export type AnimationType =

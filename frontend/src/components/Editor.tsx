@@ -1256,28 +1256,111 @@ export function Editor({ initial, onBack, onSaved }: Props) {
               </>
             )}
 
-            {/* Shape Controls */}
+            {/* Shape Controls (Canva Grade) */}
             {selectedLayer.type === 'shape' && (
               <>
-                <div className="flex items-center gap-1 h-8 rounded-xl border border-slate-200 bg-white px-2 shadow-2xs">
-                  <span className="text-[10px] font-bold text-slate-400">Fill</span>
+                {/* Shape Type Morph Dropdown */}
+                <div className="flex items-center gap-1.5 h-8 rounded-xl border border-slate-200 bg-white px-2 shadow-2xs">
+                  <span className="text-[10px] font-bold text-slate-400">Shape</span>
+                  <select
+                    value={selectedLayer.shapeType || 'box'}
+                    onChange={(e) => updateLayer(selectedLayer.id, { shapeType: e.target.value as any })}
+                    className="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer"
+                  >
+                    <option value="box">⬛ Rectangle</option>
+                    <option value="rounded-box">🔲 Rounded Card</option>
+                    <option value="pill">💊 Pill / Capsule</option>
+                    <option value="circle">⚪ Circle</option>
+                    <option value="triangle">▲ Triangle</option>
+                    <option value="star">★ Star Badge</option>
+                    <option value="hexagon">⬡ Hexagon</option>
+                    <option value="ribbon">🎀 News Ribbon</option>
+                    <option value="banner">🚩 News Banner</option>
+                    <option value="arrow">➔ Broadcast Arrow</option>
+                    <option value="speech-bubble">💬 Speech Bubble</option>
+                  </select>
+                </div>
+
+                {/* Fill Mode */}
+                <div className="flex items-center gap-1 h-8 rounded-xl border border-slate-200 bg-white p-0.5 shadow-2xs">
+                  <button
+                    type="button"
+                    onClick={() => updateLayer(selectedLayer.id, { fillType: 'solid' })}
+                    className={`h-full px-2 rounded-lg text-[10px] font-bold transition-all ${
+                      (!selectedLayer.fillType || selectedLayer.fillType === 'solid') ? 'bg-[#1E56A0] text-white' : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    Solid
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateLayer(selectedLayer.id, { fillType: 'gradient' })}
+                    className={`h-full px-2 rounded-lg text-[10px] font-bold transition-all ${
+                      selectedLayer.fillType === 'gradient' ? 'bg-[#1E56A0] text-white' : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    Gradient
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateLayer(selectedLayer.id, { fillType: 'glass', backdropBlur: 16 })}
+                    className={`h-full px-2 rounded-lg text-[10px] font-bold transition-all ${
+                      selectedLayer.fillType === 'glass' ? 'bg-[#1E56A0] text-white' : 'text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    Glass
+                  </button>
+                </div>
+
+                {/* Fill Color */}
+                <div className="flex items-center gap-1.5 h-8 rounded-xl border border-slate-200 bg-white px-2 shadow-2xs">
+                  <span className="text-[10px] font-bold text-slate-400">Color</span>
                   <input
                     type="color"
                     value={selectedLayer.backgroundColor || model.accentColor}
                     onChange={(e) => updateLayer(selectedLayer.id, { backgroundColor: e.target.value })}
                     className="h-5 w-5 rounded-full border border-slate-200 cursor-pointer p-0 overflow-hidden"
                   />
+                  {selectedLayer.fillType === 'gradient' && (
+                    <input
+                      type="color"
+                      value={selectedLayer.gradientColorEnd || '#E63946'}
+                      onChange={(e) => updateLayer(selectedLayer.id, { gradientColorEnd: e.target.value })}
+                      className="h-5 w-5 rounded-full border border-slate-200 cursor-pointer p-0 overflow-hidden"
+                    />
+                  )}
                 </div>
 
+                {/* Border Stroke */}
                 <div className="flex items-center gap-1.5 h-8 rounded-xl border border-slate-200 bg-white px-2.5 shadow-2xs">
-                  <span className="text-[11px] font-bold text-slate-600">Slant X</span>
+                  <span className="text-[10px] font-bold text-slate-400">Border</span>
                   <input
                     type="range"
-                    min={-60}
-                    max={60}
+                    min={0}
+                    max={20}
+                    value={selectedLayer.strokeWidth || 0}
+                    onChange={(e) => updateLayer(selectedLayer.id, { strokeWidth: Number(e.target.value) })}
+                    className="w-12 h-1 accent-[#1E56A0] cursor-pointer"
+                  />
+                  <span className="text-[10px] font-bold text-slate-500 w-4">{selectedLayer.strokeWidth || 0}</span>
+                  <input
+                    type="color"
+                    value={selectedLayer.strokeColor || '#ffffff'}
+                    onChange={(e) => updateLayer(selectedLayer.id, { strokeColor: e.target.value })}
+                    className="h-4 w-4 rounded-full border border-slate-200 cursor-pointer p-0 overflow-hidden"
+                  />
+                </div>
+
+                {/* Bend / Slant X */}
+                <div className="flex items-center gap-1.5 h-8 rounded-xl border border-slate-200 bg-white px-2.5 shadow-2xs">
+                  <span className="text-[11px] font-bold text-slate-600">Slant</span>
+                  <input
+                    type="range"
+                    min={-45}
+                    max={45}
                     value={selectedLayer.skewX || 0}
                     onChange={(e) => updateLayer(selectedLayer.id, { skewX: Number(e.target.value) })}
-                    className="w-16 h-1 accent-[#1E56A0] cursor-pointer"
+                    className="w-14 h-1 accent-[#1E56A0] cursor-pointer"
                   />
                   <span className="text-[10px] font-bold text-slate-500 w-6">{selectedLayer.skewX || 0}°</span>
                 </div>

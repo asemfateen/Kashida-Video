@@ -341,6 +341,30 @@ const LayerView = memo(function LayerView({
     shapeBg = layer.backgroundColor || 'rgba(15,23,42,0.75)'
   }
 
+  let shapeClipPath: string | undefined = undefined
+  if (layer.type === 'shape') {
+    switch (layer.shapeType) {
+      case 'triangle':
+        shapeClipPath = 'polygon(50% 0%, 0% 100%, 100% 100%)'
+        break
+      case 'star':
+        shapeClipPath = 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)'
+        break
+      case 'hexagon':
+        shapeClipPath = 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)'
+        break
+      case 'ribbon':
+      case 'banner':
+        shapeClipPath = 'polygon(0% 0%, 92% 0%, 100% 50%, 92% 100%, 0% 100%, 8% 50%)'
+        break
+      case 'arrow':
+        shapeClipPath = 'polygon(0% 25%, 65% 25%, 65% 0%, 100% 50%, 65% 100%, 65% 75%, 0% 75%)'
+        break
+      default:
+        shapeClipPath = undefined
+    }
+  }
+
   const shapeRadius = layer.shapeType === 'circle' ? '50%' : layer.shapeType === 'pill' ? '9999px' : layer.borderRadius ? `${layer.borderRadius}px` : '20px'
   const shapeBlur = layer.backdropBlur || (layer.fillType === 'glass' ? 16 : undefined)
   const shapeBorder = layer.strokeWidth
@@ -372,10 +396,11 @@ const LayerView = memo(function LayerView({
     WebkitTextFillColor: layer.gradient ? 'transparent' : undefined,
     color: layer.color,
     backgroundColor: layer.type === 'shape' ? shapeBg : hasPillBg ? layer.backgroundColor : undefined,
-    borderRadius: layer.type === 'shape' ? shapeRadius : layer.borderRadius ? `${layer.borderRadius}px` : undefined,
-    border: layer.type === 'shape' ? shapeBorder : undefined,
+    borderRadius: layer.type === 'shape' && !shapeClipPath ? shapeRadius : layer.borderRadius ? `${layer.borderRadius}px` : undefined,
+    clipPath: shapeClipPath,
+    border: layer.type === 'shape' && !shapeClipPath ? shapeBorder : undefined,
     backdropFilter: layer.type === 'shape' && shapeBlur ? `blur(${shapeBlur}px)` : undefined,
-    boxShadow: layer.type === 'shape' ? shapeShadow : hasPillBg ? '0 8px 24px rgba(0,0,0,0.35)' : undefined,
+    boxShadow: layer.type === 'shape' && !shapeClipPath ? shapeShadow : hasPillBg ? '0 8px 24px rgba(0,0,0,0.35)' : undefined,
     transform: transform,
     padding: hasPillBg ? '12px 24px' : undefined,
     display: hasPillBg || layer.type === 'shape' ? 'inline-flex' : undefined,
