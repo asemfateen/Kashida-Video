@@ -640,7 +640,7 @@ const LayerView = memo(function LayerView({
 
       {/* Live drag coordinates badge */}
       {isDragging && (
-        <div className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 rounded-full bg-[#0B1528] px-3 py-1 text-[11px] font-bold text-white shadow-lg backdrop-blur-md">
+        <div className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-full bg-[#0B1528] px-6 py-2.5 text-[24px] font-bold text-white shadow-2xl backdrop-blur-xl border border-white/20">
           <span>X: {Math.round(layer.x)}%</span>
           <span className="opacity-40">·</span>
           <span>Y: {Math.round(layer.y)}%</span>
@@ -653,70 +653,64 @@ const LayerView = memo(function LayerView({
         </div>
       )}
 
-      {/* Canva-Grade Selection Bounding Box & Large Prominent Handles */}
+      {/* Figma/Canva-Clean Selection Bounding Box with Outward Offset */}
       {selected && layer.type !== 'background' && (
-        <div className="pointer-events-none absolute -inset-1 rounded-sm border-3 border-[#1E56A0] shadow-[0_0_0_2px_rgba(255,255,255,0.95)]">
-          {/* Layer Name Tag (Readable at canvas scale) */}
-          <div className="absolute -top-10 left-0 flex items-center gap-1.5 rounded-t-xl bg-[#1E56A0] px-3.5 py-1 text-sm font-bold text-white shadow-md">
+        <div className="pointer-events-none absolute -inset-3 rounded-md border-2 border-[#1E56A0] shadow-[0_0_0_1px_rgba(255,255,255,0.7)]">
+          {/* Layer Name Tag (Prominent & easy to read on scaled canvas) */}
+          <div className="absolute -top-14 left-0 flex items-center gap-2 rounded-xl bg-[#1E56A0] px-4 py-1.5 text-[24px] font-black text-white shadow-xl ring-2 ring-white/50 tracking-wide select-none">
             <span>{layer.name}</span>
           </div>
 
-          {/* 4 Large Corner Resize Handles */}
+          {/* 4 Crisp Corner Handles (Figma Square / Pill Handles placed on outer offset box) */}
           <div
-            className="pointer-events-auto absolute -left-4 -top-4 h-9 w-9 cursor-nwse-resize rounded-full border-4 border-[#1E56A0] bg-white shadow-xl hover:scale-125 transition-transform z-30"
+            className="pointer-events-auto absolute -left-1.5 -top-1.5 h-3 w-3 cursor-nwse-resize rounded-xs border border-[#1E56A0] bg-white shadow-xs hover:scale-150 transition-transform z-30"
             onPointerDown={(e) => startResize(e, 'nw')}
             title="Drag corner to resize"
           />
           <div
-            className="pointer-events-auto absolute -right-4 -top-4 h-9 w-9 cursor-nesw-resize rounded-full border-4 border-[#1E56A0] bg-white shadow-xl hover:scale-125 transition-transform z-30"
+            className="pointer-events-auto absolute -right-1.5 -top-1.5 h-3 w-3 cursor-nesw-resize rounded-xs border border-[#1E56A0] bg-white shadow-xs hover:scale-150 transition-transform z-30"
             onPointerDown={(e) => startResize(e, 'ne')}
             title="Drag corner to resize"
           />
           <div
-            className="pointer-events-auto absolute -left-4 -bottom-4 h-9 w-9 cursor-nesw-resize rounded-full border-4 border-[#1E56A0] bg-white shadow-xl hover:scale-125 transition-transform z-30"
+            className="pointer-events-auto absolute -left-1.5 -bottom-1.5 h-3 w-3 cursor-nesw-resize rounded-xs border border-[#1E56A0] bg-white shadow-xs hover:scale-150 transition-transform z-30"
             onPointerDown={(e) => startResize(e, 'sw')}
             title="Drag corner to resize"
           />
           <div
-            className="pointer-events-auto absolute -right-4 -bottom-4 h-9 w-9 cursor-nwse-resize rounded-full border-4 border-[#1E56A0] bg-white shadow-xl hover:scale-125 transition-transform z-30"
+            className="pointer-events-auto absolute -right-1.5 -bottom-1.5 h-3 w-3 cursor-nwse-resize rounded-xs border border-[#1E56A0] bg-white shadow-xs hover:scale-150 transition-transform z-30"
             onPointerDown={(e) => startResize(e, 'se')}
             title="Drag corner to resize"
           />
 
-          {/* 4 Large Edge Resize Bars */}
-          <div
-            className="pointer-events-auto absolute left-1/2 -top-3 -translate-x-1/2 h-6 w-24 cursor-ns-resize rounded-full border-3 border-[#1E56A0] bg-white shadow-md hover:scale-110 transition-transform z-30"
-            onPointerDown={(e) => startResize(e, 'n')}
-            title="Resize height"
-          />
-          <div
-            className="pointer-events-auto absolute left-1/2 -bottom-3 -translate-x-1/2 h-6 w-24 cursor-ns-resize rounded-full border-3 border-[#1E56A0] bg-white shadow-md hover:scale-110 transition-transform z-30"
-            onPointerDown={(e) => startResize(e, 's')}
-            title="Resize height"
-          />
-          <div
-            className="pointer-events-auto absolute -left-3 top-1/2 -translate-y-1/2 h-24 w-6 cursor-ew-resize rounded-full border-3 border-[#1E56A0] bg-white shadow-md hover:scale-110 transition-transform z-30"
-            onPointerDown={(e) => startResize(e, 'w')}
-            title="Resize width"
-          />
-          <div
-            className="pointer-events-auto absolute -right-3 top-1/2 -translate-y-1/2 h-24 w-6 cursor-ew-resize rounded-full border-3 border-[#1E56A0] bg-white shadow-md hover:scale-110 transition-transform z-30"
-            onPointerDown={(e) => startResize(e, 'e')}
-            title="Resize width"
-          />
+          {/* Left / Right Width Resize Handles (Only for shapes and wide containers) */}
+          {layer.type === 'shape' || layer.width ? (
+            <>
+              <div
+                className="pointer-events-auto absolute -left-1.5 top-1/2 -translate-y-1/2 h-5 w-2 cursor-ew-resize rounded-full border border-[#1E56A0] bg-white shadow-xs hover:scale-125 transition-transform z-30"
+                onPointerDown={(e) => startResize(e, 'w')}
+                title="Resize width"
+              />
+              <div
+                className="pointer-events-auto absolute -right-1.5 top-1/2 -translate-y-1/2 h-5 w-2 cursor-ew-resize rounded-full border border-[#1E56A0] bg-white shadow-xs hover:scale-125 transition-transform z-30"
+                onPointerDown={(e) => startResize(e, 'e')}
+                title="Resize width"
+              />
+            </>
+          ) : null}
 
-          {/* Large Floating Rotation Stem & Knob */}
-          <div className="pointer-events-auto absolute -bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center">
-            <div className="h-6 w-0.5 border-l-2 border-dashed border-[#1E56A0]" />
+          {/* Sleek Floating Rotation Handle safely below text */}
+          <div className="pointer-events-auto absolute -bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center">
+            <div className="h-3 w-0.5 border-l border-dashed border-[#1E56A0]" />
             <div
-              className="group relative flex h-14 w-14 cursor-grab active:cursor-grabbing items-center justify-center rounded-full border-3 border-[#1E56A0] bg-white shadow-2xl hover:scale-115 hover:bg-blue-50 transition-transform"
+              className="group relative flex h-6 w-6 cursor-grab active:cursor-grabbing items-center justify-center rounded-full border border-[#1E56A0] bg-white shadow-md hover:scale-125 hover:bg-blue-50 transition-transform"
               onPointerDown={startRotate}
               title="Drag to rotate 360°"
             >
-              <RotateCw size={24} className="text-[#1E56A0]" />
+              <RotateCw size={11} className="text-[#1E56A0]" />
               {/* Angle Tooltip during rotation */}
               {(isRotating || layer.rotation) && (
-                <div className="pointer-events-none absolute -bottom-9 left-1/2 -translate-x-1/2 z-50 rounded-xl bg-[#0B1528] px-3 py-1 text-sm font-bold text-white shadow-xl whitespace-nowrap">
+                <div className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 z-50 rounded-md bg-[#0B1528] px-2 py-0.5 text-[10px] font-bold text-white shadow-md whitespace-nowrap">
                   {currentRotation ?? layer.rotation ?? 0}°
                 </div>
               )}
@@ -1151,7 +1145,7 @@ export function Canvas({
               style={{ width: model.width + 32, height: model.height + 32, transform: `scale(${scale})` }}
             >
               {/* Dynamic Island Notch */}
-              <div className="absolute top-5 left-1/2 -translate-x-1/2 h-7 w-36 bg-black rounded-full z-50 flex items-center justify-between px-3.5 shadow-md">
+              <div className="pointer-events-none select-none absolute top-5 left-1/2 -translate-x-1/2 h-7 w-36 bg-black rounded-full z-50 flex items-center justify-between px-3.5 shadow-md">
                 <div className="w-3.5 h-3.5 rounded-full bg-[#1e293b] ring-1 ring-white/10" />
                 <div className="flex items-center gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-[#030712] ring-1 ring-white/10" />
