@@ -397,6 +397,48 @@ export function Editor({ initial, onBack, onSaved }: Props) {
     updateLayer(id, { width })
   }, [updateLayer])
 
+  const bringForward = useCallback((id: string) => {
+    updateModel((m) => {
+      const idx = m.layers.findIndex((l) => l.id === id)
+      if (idx < 0 || idx >= m.layers.length - 1) return m
+      const layers = [...m.layers]
+      const [item] = layers.splice(idx, 1)
+      layers.splice(idx + 1, 0, item)
+      return { ...m, layers }
+    })
+    addToast({ type: 'info', title: 'Layer Raised', message: 'Moved layer up', duration: 1500 })
+  }, [updateModel, addToast])
+
+  const sendBackward = useCallback((id: string) => {
+    updateModel((m) => {
+      const idx = m.layers.findIndex((l) => l.id === id)
+      if (idx <= 0) return m
+      const bgOffset = m.layers[0]?.type === 'background' ? 1 : 0
+      if (idx <= bgOffset) return m
+      const layers = [...m.layers]
+      const [item] = layers.splice(idx, 1)
+      layers.splice(idx - 1, 0, item)
+      return { ...m, layers }
+    })
+    addToast({ type: 'info', title: 'Layer Lowered', message: 'Moved layer down', duration: 1500 })
+  }, [updateModel, addToast])
+
+  const updateLayerDirectText = useCallback((id: string, text: string) => {
+    const target = model.layers.find((l) => l.id === id)
+    if (!target) return
+    if (target.type === 'headline' && activeRound) {
+      updateRound(activeRound.id, { headline: text })
+    } else if (target.type === 'subheadline' && activeRound) {
+      updateRound(activeRound.id, { subheadline: text })
+    } else if (target.type === 'label' && activeRound) {
+      updateRound(activeRound.id, { labelAr: text })
+    } else if (target.type === 'timestamp' && activeRound) {
+      updateRound(activeRound.id, { timestamp: text })
+    }
+    updateLayer(id, target.type === 'label' ? { labelAr: text } : { text })
+    addToast({ type: 'info', title: 'Text Updated', message: 'Applied text directly on canvas', duration: 1500 })
+  }, [model.layers, activeRound, updateRound, updateLayer, addToast])
+
   // --- save -------------------------------------------------------------------
   const doSave = useCallback(
     async (silent = false, createVersion = false) => {
@@ -557,6 +599,18 @@ export function Editor({ initial, onBack, onSaved }: Props) {
         return
       }
 
+      // Ctrl+] / Ctrl+[: Bring Forward / Send Backward
+      if (isCtrlOrMeta && e.key === ']') {
+        e.preventDefault()
+        bringForward(selectedId)
+        return
+      }
+      if (isCtrlOrMeta && e.key === '[') {
+        e.preventDefault()
+        sendBackward(selectedId)
+        return
+      }
+
       const step = e.shiftKey ? 5 : 1
       if (e.key === 'ArrowLeft') {
         e.preventDefault()
@@ -580,6 +634,8 @@ export function Editor({ initial, onBack, onSaved }: Props) {
     model.layers,
     deleteLayer,
     updateLayer,
+    bringForward,
+    sendBackward,
     undo,
     redo,
     duplicateLayer,
@@ -1275,6 +1331,9 @@ export function Editor({ initial, onBack, onSaved }: Props) {
               onToggleLockLayer={toggleLock}
               onAlignHLayer={alignLayerHorizontal}
               onAlignVLayer={alignLayerVertical}
+              onBringForwardLayer={bringForward}
+              onSendBackwardLayer={sendBackward}
+              onUpdateLayerText={updateLayerDirectText}
               playheadRef={clock.playheadRef}
               playing={clock.playing}
               roundOffsets={roundOffsets}
@@ -1380,6 +1439,22 @@ export function Editor({ initial, onBack, onSaved }: Props) {
               <div className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5">
                 <span className="font-semibold text-slate-700">Fast Nudge (5%)</span>
                 <kbd className="rounded-md border border-slate-200 bg-white px-2 py-0.5 font-mono text-[11px] font-bold text-slate-800 shadow-2xs">Shift + Arrows</kbd>
+              </div>
+              <div className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5">
+                <span className="font-semibold text-slate-700">Bring Forward</span>
+                <kbd className="rounded-md border border-slate-200 bg-white px-2 py-0.5 font-mono text-[11px] font-bold text-slate-800 shadow-2xs">Ctrl + ]</kbd>
+              </div>
+              <div className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5">
+                <span className="font-semibold text-slate-700">Send Backward</span>
+                <kbd className="rounded-md border border-slate-200 bg-white px-2 py-0.5 font-mono text-[11px] font-bold text-slate-800 shadow-2xs">Ctrl + [</kbd>
+              </div>
+              <div className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5">
+                <span className="font-semibold text-slate-700">Clone on Drag</span>
+                <kbd className="rounded-md border border-slate-200 bg-white px-2 py-0.5 font-mono text-[11px] font-bold text-slate-800 shadow-2xs">Alt + Drag</kbd>
+              </div>
+              <div className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5">
+                <span className="font-semibold text-slate-700">Inline Edit Text</span>
+                <kbd className="rounded-md border border-slate-200 bg-white px-2 py-0.5 font-mono text-[11px] font-bold text-slate-800 shadow-2xs">Double Click</kbd>
               </div>
             </div>
 

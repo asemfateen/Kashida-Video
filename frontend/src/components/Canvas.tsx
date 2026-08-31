@@ -29,6 +29,9 @@ import {
   LockOpen,
   AlignHorizontalJustifyCenter,
   AlignVerticalJustifyCenter,
+  ArrowUp,
+  ArrowDown,
+  Edit3,
 } from 'lucide-react'
 import type { Layer, TemplateModel, TextAlign } from '../lib/model'
 import { CSS_EASING, waaiKeyframes } from '../lib/animations'
@@ -54,6 +57,10 @@ interface LayerViewProps {
   onToggleLock?: (id: string) => void
   onAlignH?: (id: string) => void
   onAlignV?: (id: string) => void
+  onBringForward?: (id: string) => void
+  onSendBackward?: (id: string) => void
+  onUpdateText?: (id: string, text: string) => void
+  onContextMenu?: (e: ReactMouseEvent, id: string) => void
   registry: Registry
   playheadRef: MutableRefObject<number>
   onDragStateChange?: (dragging: boolean, layerX?: number, layerY?: number, layerW?: number) => void
@@ -73,16 +80,47 @@ const LayerView = memo(function LayerView({
   onToggleLock,
   onAlignH,
   onAlignV,
+  onBringForward,
+  onSendBackward,
+  onUpdateText,
+  onContextMenu,
   registry,
   playheadRef,
   onDragStateChange,
 }: LayerViewProps) {
   const ref = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const animRef = useRef<Animation | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [isRotating, setIsRotating] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editText, setEditText] = useState(layer.text || layer.labelAr || '')
   const [currentRotation, setCurrentRotation] = useState<number | null>(null)
   const dragState = useRef<{ px: number; py: number; ox: number; oy: number; moved: boolean } | null>(null)
+
+  useEffect(() => {
+    setEditText(layer.text || layer.labelAr || '')
+  }, [layer.text, layer.labelAr])
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus()
+      inputRef.current.select()
+    }
+  }, [isEditing])
+
+  const handleDoubleClick = useCallback((e: ReactMouseEvent) => {
+    if (layer.locked || layer.type === 'background' || layer.type === 'accentBar') return
+    e.stopPropagation()
+    setIsEditing(true)
+  }, [layer.locked, layer.type])
+
+  const handleCommitText = useCallback(() => {
+    setIsEditing(false)
+    if (onUpdateText && editText !== (layer.text || layer.labelAr || '')) {
+      onUpdateText(layer.id, editText)
+    }
+  }, [onUpdateText, layer.id, editText, layer.text, layer.labelAr])
 
   // Create/register the entrance animation.
   useEffect(() => {
@@ -336,130 +374,159 @@ const LayerView = memo(function LayerView({
       style={style}
       onPointerDown={startDrag}
       onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
+      onContextMenu={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        onContextMenu?.(e, layer.id)
+      }}
     >
-      {layer.type === 'shape' ? (
-        <div className="relative w-full h-full flex items-center justify-center select-none">
-          {layer.shapeType === 'speech-bubble' && (
-            <div className="absolute -bottom-4 right-8 w-0 h-0 border-t-[16px] border-t-current border-l-[16px] border-l-transparent" style={{ color: layer.backgroundColor || accent }} />
-          )}
-          {layer.text && <span className="p-4">{layer.text}</span>}
-        </div>
-      ) : null}
-      {layer.widgetType === 'breaking_ticker' ? (
-        <div className="flex items-center gap-4 bg-red-600 px-6 py-2 rounded-xl font-black text-white shadow-2xl">
-          <span className="bg-white text-red-600 px-3 py-1 rounded-md text-[0.75em] uppercase font-black animate-pulse">عاجل</span>
-          <span className="text-[1.05em]">{layer.text || 'خبر عاجل'}</span>
-        </div>
-      ) : layer.widgetType === 'speaker_card' ? (
-        <div className="flex items-center gap-4 bg-slate-950/90 backdrop-blur-md px-6 py-3 rounded-2xl border-r-4 shadow-2xl" style={{ borderColor: accent }}>
-          <div className="flex flex-col text-right">
-            <span className="text-[1.15em] font-black text-white">{layer.text?.split('·')[0]?.trim() || layer.text || 'صاحب التصريح'}</span>
-            {layer.text?.includes('·') && (
-              <span className="text-[0.85em] font-bold mt-0.5" style={{ color: accent }}>{layer.text.split('·')[1]?.trim()}</span>
-            )}
-          </div>
-        </div>
-      ) : layer.widgetType === 'progress_bar' ? (
-        <div className="w-full h-2.5 bg-white/20 rounded-full overflow-hidden">
-          <div className="h-full rounded-full transition-all" style={{ background: accent, width: '60%' }} />
-        </div>
-      ) : layer.type === 'label' ? (
-        layer.labelAr?.includes('مونديال') ? (
-          <span className="inline-flex relative drop-shadow-[0_14px_28px_rgba(0,0,0,0.55)]">
-            <span className="inline-flex flex-row items-stretch rounded-r-full overflow-hidden" style={{ height: 76, background: layer.backgroundColor || '#7C3AED' }} dir="ltr">
-              <span className="relative flex flex-col items-center justify-center bg-black px-3.5 py-1 text-white rounded-tl-xl">
-                <svg viewBox="0 0 44 54" width="44" height="54" fill="none">
-                  <text x="7" y="24" fontFamily="'Plus Jakarta Sans', Arial, sans-serif" fontWeight="900" fontSize="28" fill="#FFFFFF">2</text>
-                  <text x="25" y="24" fontFamily="'Plus Jakarta Sans', Arial, sans-serif" fontWeight="900" fontSize="28" fill="#FFFFFF">6</text>
-                  <path d="M18 6C18 4 20 2 22 2C24 2 26 4 26 6C26 8 28 10 28 14C28 18 24 21 22 21C20 21 16 18 16 14C16 10 18 8 18 6Z" fill="#F59E0B"/>
-                  <path d="M19 21H25V28H19V21Z" fill="#D97706"/>
-                  <rect x="17" y="28" width="10" height="4" rx="1" fill="#FFFFFF"/>
-                  <text x="22" y="44" fontFamily="'Plus Jakarta Sans', Arial, sans-serif" fontWeight="900" fontSize="10" fill="#FFFFFF" textAnchor="middle" letterSpacing="1.5">FIFA</text>
-                </svg>
-                {/* Speech bubble tail pointing down-left */}
-                <span className="absolute -bottom-4 left-0 w-0 h-0 border-t-[16px] border-t-black border-r-[18px] border-r-transparent" />
-              </span>
-              <span className="flex items-center justify-center px-8 text-[38px] font-black text-white tracking-widest font-sans" dir="rtl">
-                {layer.labelAr.replace(/🏆/g, '').trim()}
-              </span>
-            </span>
-          </span>
-        ) : (
-          <span
-            className="inline-flex items-center gap-3 px-4 py-1 leading-none text-white shadow-xs"
-            style={{ background: layer.backgroundColor || accent }}
-          >
-            <span style={{ fontSize: layer.fontSize, fontWeight: 700 }}>{layer.labelAr || ''}</span>
-            <span style={{ fontSize: Math.round(layer.fontSize * 0.6), fontWeight: 700, opacity: 0.85, letterSpacing: 2 }}>{layer.labelEn || ''}</span>
-          </span>
-        )
-      ) : null}
-      {layer.type === 'accentBar' && <div style={{ width: '100%', height: layer.height ?? 1920, background: layer.backgroundColor || accent }} />}
-      {layer.type === 'card' && (
-        <div
-          className="w-full shadow-2xl transition-all"
-          style={{
-            height: layer.height ?? 420,
-            background: layer.backgroundColor || 'rgba(15,23,42,0.85)',
-            border: layer.border || '2px solid rgba(255,183,3,0.3)',
-            borderRadius: layer.borderRadius ?? 28,
-            backdropFilter: `blur(${layer.backdropBlur ?? 16}px)`,
+      {isEditing ? (
+        <textarea
+          ref={inputRef}
+          value={editText}
+          onChange={(e) => setEditText(e.target.value)}
+          onBlur={handleCommitText}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              handleCommitText()
+            } else if (e.key === 'Escape') {
+              setIsEditing(false)
+              setEditText(layer.text || layer.labelAr || '')
+            }
           }}
-        >
-          {layer.text && <div className="p-6">{layer.text}</div>}
-        </div>
-      )}
-      {layer.type === 'timestamp' && layer.text?.includes('@') ? (
-        <div className="flex flex-col items-end gap-1">
-          <div className="inline-flex flex-row items-stretch overflow-hidden rounded-lg shadow-lg" dir="ltr">
-            <span className="bg-[#0B0F19] px-2.5 py-1 text-[18px] font-bold text-white font-sans">
-              {layer.text.split('·')[0]?.trim().replace(/🎥/g, '').trim()}
-            </span>
-            <span className="flex items-center justify-center bg-[#EA580C] px-2 text-white text-[14px]">
-              📹
-            </span>
-          </div>
-          <div className="text-[16px] font-bold text-white drop-shadow-md font-sans tracking-wide text-right">
-            {layer.text.split('·')[1]?.trim() ?? '2026-07-10'}
-          </div>
-        </div>
-      ) : null}
-      {layer.type === 'subheadline' && layer.text?.includes('📍') ? (
-        <div className="inline-flex items-center gap-2.5 drop-shadow-[0_4px_10px_rgba(0,0,0,0.7)]">
-          <span className="text-[32px] font-black text-white tracking-wide font-sans">
-            {layer.text.replace(/📍/g, '').trim()}
-          </span>
-          <span className="flex flex-col items-center relative">
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="#FFFFFF">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-            </svg>
-            <span className="w-4 h-1 bg-[#7C3AED] rounded-full -mt-0.5" />
-          </span>
-        </div>
-      ) : null}
-      {layer.type === 'logo' && layer.imageUrl ? (
-        <img src={layer.imageUrl} alt="logo" style={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
+          className="pointer-events-auto relative z-50 w-full resize-none bg-black/60 backdrop-blur-md border-2 border-dashed border-[#1E56A0] rounded-xl p-2 outline-none text-white font-inherit shadow-2xl"
+          rows={Math.max(1, (editText.match(/\n/g) || []).length + 1)}
+          dir="rtl"
+        />
       ) : (
-        (layer.type !== 'timestamp' || !layer.text?.includes('@')) &&
-        (layer.type !== 'subheadline' || !layer.text?.includes('📍')) &&
-        layer.type !== 'label' &&
-        layer.type !== 'card' &&
-        layer.type !== 'accentBar' &&
-        !layer.widgetType ? (
-          (layer.type === 'headline' || layer.type === 'subheadline' || layer.type === 'logo' || layer.type === 'footer' || layer.type === 'timestamp') && (
-            <span>
-              {layer.animation.type === 'word-stagger' && layer.text ? (
-                layer.text.trim().split(/\s+/).map((w, wi) => (
-                  <span key={wi} className="inline-block px-1">
-                    {w}{' '}
-                  </span>
-                ))
-              ) : (
-                layer.text || ''
+        <>
+          {layer.type === 'shape' ? (
+            <div className="relative w-full h-full flex items-center justify-center select-none">
+              {layer.shapeType === 'speech-bubble' && (
+                <div className="absolute -bottom-4 right-8 w-0 h-0 border-t-[16px] border-t-current border-l-[16px] border-l-transparent" style={{ color: layer.backgroundColor || accent }} />
               )}
-            </span>
-          )
-        ) : null
+              {layer.text && <span className="p-4">{layer.text}</span>}
+            </div>
+          ) : null}
+          {layer.widgetType === 'breaking_ticker' ? (
+            <div className="flex items-center gap-4 bg-red-600 px-6 py-2 rounded-xl font-black text-white shadow-2xl">
+              <span className="bg-white text-red-600 px-3 py-1 rounded-md text-[0.75em] uppercase font-black animate-pulse">عاجل</span>
+              <span className="text-[1.05em]">{layer.text || 'خبر عاجل'}</span>
+            </div>
+          ) : layer.widgetType === 'speaker_card' ? (
+            <div className="flex items-center gap-4 bg-slate-950/90 backdrop-blur-md px-6 py-3 rounded-2xl border-r-4 shadow-2xl" style={{ borderColor: accent }}>
+              <div className="flex flex-col text-right">
+                <span className="text-[1.15em] font-black text-white">{layer.text?.split('·')[0]?.trim() || layer.text || 'صاحب التصريح'}</span>
+                {layer.text?.includes('·') && (
+                  <span className="text-[0.85em] font-bold mt-0.5" style={{ color: accent }}>{layer.text.split('·')[1]?.trim()}</span>
+                )}
+              </div>
+            </div>
+          ) : layer.widgetType === 'progress_bar' ? (
+            <div className="w-full h-2.5 bg-white/20 rounded-full overflow-hidden">
+              <div className="h-full rounded-full transition-all" style={{ background: accent, width: '60%' }} />
+            </div>
+          ) : layer.type === 'label' ? (
+            layer.labelAr?.includes('مونديال') ? (
+              <span className="inline-flex relative drop-shadow-[0_14px_28px_rgba(0,0,0,0.55)]">
+                <span className="inline-flex flex-row items-stretch rounded-r-full overflow-hidden" style={{ height: 76, background: layer.backgroundColor || '#7C3AED' }} dir="ltr">
+                  <span className="relative flex flex-col items-center justify-center bg-black px-3.5 py-1 text-white rounded-tl-xl">
+                    <svg viewBox="0 0 44 54" width="44" height="54" fill="none">
+                      <text x="7" y="24" fontFamily="'Plus Jakarta Sans', Arial, sans-serif" fontWeight="900" fontSize="28" fill="#FFFFFF">2</text>
+                      <text x="25" y="24" fontFamily="'Plus Jakarta Sans', Arial, sans-serif" fontWeight="900" fontSize="28" fill="#FFFFFF">6</text>
+                      <path d="M18 6C18 4 20 2 22 2C24 2 26 4 26 6C26 8 28 10 28 14C28 18 24 21 22 21C20 21 16 18 16 14C16 10 18 8 18 6Z" fill="#F59E0B"/>
+                      <path d="M19 21H25V28H19V21Z" fill="#D97706"/>
+                      <rect x="17" y="28" width="10" height="4" rx="1" fill="#FFFFFF"/>
+                      <text x="22" y="44" fontFamily="'Plus Jakarta Sans', Arial, sans-serif" fontWeight="900" fontSize="10" fill="#FFFFFF" textAnchor="middle" letterSpacing="1.5">FIFA</text>
+                    </svg>
+                    {/* Speech bubble tail pointing down-left */}
+                    <span className="absolute -bottom-4 left-0 w-0 h-0 border-t-[16px] border-t-black border-r-[18px] border-r-transparent" />
+                  </span>
+                  <span className="flex items-center justify-center px-8 text-[38px] font-black text-white tracking-widest font-sans" dir="rtl">
+                    {layer.labelAr.replace(/🏆/g, '').trim()}
+                  </span>
+                </span>
+              </span>
+            ) : (
+              <span
+                className="inline-flex items-center gap-3 px-4 py-1 leading-none text-white shadow-xs"
+                style={{ background: layer.backgroundColor || accent }}
+              >
+                <span style={{ fontSize: layer.fontSize, fontWeight: 700 }}>{layer.labelAr || ''}</span>
+                <span style={{ fontSize: Math.round(layer.fontSize * 0.6), fontWeight: 700, opacity: 0.85, letterSpacing: 2 }}>{layer.labelEn || ''}</span>
+              </span>
+            )
+          ) : null}
+          {layer.type === 'accentBar' && <div style={{ width: '100%', height: layer.height ?? 1920, background: layer.backgroundColor || accent }} />}
+          {layer.type === 'card' && (
+            <div
+              className="w-full shadow-2xl transition-all"
+              style={{
+                height: layer.height ?? 420,
+                background: layer.backgroundColor || 'rgba(15,23,42,0.85)',
+                border: layer.border || '2px solid rgba(255,183,3,0.3)',
+                borderRadius: layer.borderRadius ?? 28,
+                backdropFilter: `blur(${layer.backdropBlur ?? 16}px)`,
+              }}
+            >
+              {layer.text && <div className="p-6">{layer.text}</div>}
+            </div>
+          )}
+          {layer.type === 'timestamp' && layer.text?.includes('@') ? (
+            <div className="flex flex-col items-end gap-1">
+              <div className="inline-flex flex-row items-stretch overflow-hidden rounded-lg shadow-lg" dir="ltr">
+                <span className="bg-[#0B0F19] px-2.5 py-1 text-[18px] font-bold text-white font-sans">
+                  {layer.text.split('·')[0]?.trim().replace(/🎥/g, '').trim()}
+                </span>
+                <span className="flex items-center justify-center bg-[#EA580C] px-2 text-white text-[14px]">
+                  📹
+                </span>
+              </div>
+              <div className="text-[16px] font-bold text-white drop-shadow-md font-sans tracking-wide text-right">
+                {layer.text.split('·')[1]?.trim() ?? '2026-07-10'}
+              </div>
+            </div>
+          ) : null}
+          {layer.type === 'subheadline' && layer.text?.includes('📍') ? (
+            <div className="inline-flex items-center gap-2.5 drop-shadow-[0_4px_10px_rgba(0,0,0,0.7)]">
+              <span className="text-[32px] font-black text-white tracking-wide font-sans">
+                {layer.text.replace(/📍/g, '').trim()}
+              </span>
+              <span className="flex flex-col items-center relative">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="#FFFFFF">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
+                <span className="w-4 h-1 bg-[#7C3AED] rounded-full -mt-0.5" />
+              </span>
+            </div>
+          ) : null}
+          {layer.type === 'logo' && layer.imageUrl ? (
+            <img src={layer.imageUrl} alt="logo" style={{ width: '100%', height: 'auto', objectFit: 'contain' }} />
+          ) : (
+            (layer.type !== 'timestamp' || !layer.text?.includes('@')) &&
+            (layer.type !== 'subheadline' || !layer.text?.includes('📍')) &&
+            layer.type !== 'label' &&
+            layer.type !== 'card' &&
+            layer.type !== 'accentBar' &&
+            !layer.widgetType ? (
+              (layer.type === 'headline' || layer.type === 'subheadline' || layer.type === 'logo' || layer.type === 'footer' || layer.type === 'timestamp') && (
+                <span>
+                  {layer.animation.type === 'word-stagger' && layer.text ? (
+                    layer.text.trim().split(/\s+/).map((w, wi) => (
+                      <span key={wi} className="inline-block px-1">
+                        {w}{' '}
+                      </span>
+                    ))
+                  ) : (
+                    layer.text || ''
+                  )}
+                </span>
+              )
+            ) : null
+          )}
+        </>
       )}
 
       {/* Live drag coordinates badge */}
@@ -482,14 +549,44 @@ const LayerView = memo(function LayerView({
         <div className="pointer-events-none absolute -inset-1 rounded-sm border-2 border-[#1E56A0] shadow-[0_0_0_1px_rgba(255,255,255,0.95)]">
           {/* Floating Canva Quick Action Mini-Toolbar */}
           <div className="pointer-events-auto absolute -top-12 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 rounded-2xl border border-slate-800/60 bg-[#0B1528]/95 px-2 py-1 shadow-2xl backdrop-blur-md">
+            {(layer.type === 'headline' || layer.type === 'subheadline' || layer.type === 'label' || layer.type === 'timestamp' || layer.type === 'footer') && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setIsEditing(true) }}
+                title="Edit text (Double Click)"
+                className="flex h-7 w-7 items-center justify-center rounded-xl text-slate-300 hover:bg-white/15 hover:text-white transition-colors cursor-pointer"
+              >
+                <Edit3 size={13} />
+              </button>
+            )}
             {onDuplicate && (
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onDuplicate(layer.id) }}
-                title="Duplicate layer (Ctrl+D)"
+                title="Duplicate layer (Ctrl+D / Alt+Drag)"
                 className="flex h-7 w-7 items-center justify-center rounded-xl text-slate-300 hover:bg-white/15 hover:text-white transition-colors cursor-pointer"
               >
                 <Copy size={13} />
+              </button>
+            )}
+            {onBringForward && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onBringForward(layer.id) }}
+                title="Bring forward (Ctrl+])"
+                className="flex h-7 w-7 items-center justify-center rounded-xl text-slate-300 hover:bg-white/15 hover:text-white transition-colors cursor-pointer"
+              >
+                <ArrowUp size={13} />
+              </button>
+            )}
+            {onSendBackward && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onSendBackward(layer.id) }}
+                title="Send backward (Ctrl+[)"
+                className="flex h-7 w-7 items-center justify-center rounded-xl text-slate-300 hover:bg-white/15 hover:text-white transition-colors cursor-pointer"
+              >
+                <ArrowDown size={13} />
               </button>
             )}
             {onAlignH && (
@@ -732,6 +829,9 @@ interface CanvasProps {
   onToggleLockLayer?: (id: string) => void
   onAlignHLayer?: (id: string) => void
   onAlignVLayer?: (id: string) => void
+  onBringForwardLayer?: (id: string) => void
+  onSendBackwardLayer?: (id: string) => void
+  onUpdateLayerText?: (id: string, text: string) => void
   playheadRef: MutableRefObject<number>
   playing: boolean
   roundOffsets?: { id: string; start: number; duration: number }[]
@@ -768,6 +868,9 @@ export function Canvas({
   onToggleLockLayer,
   onAlignHLayer,
   onAlignVLayer,
+  onBringForwardLayer,
+  onSendBackwardLayer,
+  onUpdateLayerText,
   playheadRef,
   playing,
   roundOffsets,
@@ -780,7 +883,26 @@ export function Canvas({
   const [zoom, setZoom] = useState<Zoom>('fit')
   const [guides, setGuides] = useState(false)
   const [activeGuide, setActiveGuide] = useState<{ v?: boolean; h?: boolean } | null>(null)
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; layerId: string } | null>(null)
   const isVertical = model.width === 1080 && model.height === 1920
+
+  const handleContextMenu = useCallback((e: ReactMouseEvent, id: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onSelect(id)
+    setContextMenu({ x: e.clientX, y: e.clientY, layerId: id })
+  }, [onSelect])
+
+  useEffect(() => {
+    const close = () => setContextMenu(null)
+    window.addEventListener('click', close)
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') close()
+    })
+    return () => {
+      window.removeEventListener('click', close)
+    }
+  }, [])
 
   const handleDragStateChange = useCallback((dragging: boolean, lx?: number, ly?: number, lw?: number) => {
     if (!dragging || lx === undefined || ly === undefined) {
@@ -980,6 +1102,10 @@ export function Canvas({
                           onToggleLock={onToggleLockLayer}
                           onAlignH={onAlignHLayer}
                           onAlignV={onAlignVLayer}
+                          onBringForward={onBringForwardLayer}
+                          onSendBackward={onSendBackwardLayer}
+                          onUpdateText={onUpdateLayerText}
+                          onContextMenu={handleContextMenu}
                           registry={registry}
                           playheadRef={playheadRef}
                           onDragStateChange={handleDragStateChange}
@@ -1051,6 +1177,10 @@ export function Canvas({
                     onToggleLock={onToggleLockLayer}
                     onAlignH={onAlignHLayer}
                     onAlignV={onAlignVLayer}
+                    onBringForward={onBringForwardLayer}
+                    onSendBackward={onSendBackwardLayer}
+                    onUpdateText={onUpdateLayerText}
+                    onContextMenu={handleContextMenu}
                     playheadRef={playheadRef}
                     registry={registry}
                     onDragStateChange={handleDragStateChange}
@@ -1060,6 +1190,102 @@ export function Canvas({
           </div>
         )}
       </div>
+
+      {/* Figma / Canva Context Menu */}
+      {contextMenu && (
+        <div
+          className="fixed z-50 min-w-[180px] overflow-hidden rounded-2xl border border-slate-700/80 bg-[#0B1528]/95 p-1 text-xs text-slate-200 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100"
+          style={{ top: Math.min(window.innerHeight - 240, contextMenu.y), left: Math.min(window.innerWidth - 200, contextMenu.x) }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {onDuplicateLayer && (
+            <button
+              type="button"
+              onClick={() => { onDuplicateLayer(contextMenu.layerId); setContextMenu(null) }}
+              className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-left hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <Copy size={13} className="text-slate-400" />
+                <span>Duplicate</span>
+              </div>
+              <span className="text-[10px] text-slate-500 font-mono">Ctrl+D</span>
+            </button>
+          )}
+          {onBringForwardLayer && (
+            <button
+              type="button"
+              onClick={() => { onBringForwardLayer(contextMenu.layerId); setContextMenu(null) }}
+              className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-left hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <ArrowUp size={13} className="text-slate-400" />
+                <span>Bring Forward</span>
+              </div>
+              <span className="text-[10px] text-slate-500 font-mono">Ctrl+]</span>
+            </button>
+          )}
+          {onSendBackwardLayer && (
+            <button
+              type="button"
+              onClick={() => { onSendBackwardLayer(contextMenu.layerId); setContextMenu(null) }}
+              className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-left hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <ArrowDown size={13} className="text-slate-400" />
+                <span>Send Backward</span>
+              </div>
+              <span className="text-[10px] text-slate-500 font-mono">Ctrl+[</span>
+            </button>
+          )}
+          <div className="my-1 h-px bg-slate-800" />
+          {onAlignHLayer && (
+            <button
+              type="button"
+              onClick={() => { onAlignHLayer(contextMenu.layerId); setContextMenu(null) }}
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+            >
+              <AlignHorizontalJustifyCenter size={13} className="text-slate-400" />
+              <span>Center Horizontally</span>
+            </button>
+          )}
+          {onAlignVLayer && (
+            <button
+              type="button"
+              onClick={() => { onAlignVLayer(contextMenu.layerId); setContextMenu(null) }}
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+            >
+              <AlignVerticalJustifyCenter size={13} className="text-slate-400" />
+              <span>Center Vertically</span>
+            </button>
+          )}
+          {onToggleLockLayer && (
+            <button
+              type="button"
+              onClick={() => { onToggleLockLayer(contextMenu.layerId); setContextMenu(null) }}
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+            >
+              <Lock size={13} className="text-slate-400" />
+              <span>Lock / Unlock</span>
+            </button>
+          )}
+          {onDeleteLayer && (
+            <>
+              <div className="my-1 h-px bg-slate-800" />
+              <button
+                type="button"
+                onClick={() => { onDeleteLayer(contextMenu.layerId); setContextMenu(null) }}
+                className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-left text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <Trash2 size={13} />
+                  <span>Delete</span>
+                </div>
+                <span className="text-[10px] text-red-400/60 font-mono">Del</span>
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }
