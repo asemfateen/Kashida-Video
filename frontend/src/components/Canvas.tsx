@@ -384,7 +384,17 @@ const LayerView = memo(function LayerView({
     left: layer.type === 'background' ? 0 : `${layer.x}%`,
     top: layer.type === 'background' ? 0 : `${layer.y}%`,
     width: layer.type === 'background' ? '100%' : layer.width && layer.width > 0 ? `${layer.width}%` : 'auto',
-    height: layer.type === 'background' ? '100%' : layer.height ? `${layer.height}px` : undefined,
+    height:
+      layer.type === 'background'
+        ? '100%'
+        : layer.height
+        ? `${layer.height}px`
+        : layer.type === 'shape'
+        ? layer.shapeType === 'circle'
+          ? (layer.width ? undefined : '220px')
+          : '180px'
+        : undefined,
+    aspectRatio: layer.type === 'shape' && layer.shapeType === 'circle' ? '1 / 1' : undefined,
     textAlign: cssAlign(layer.textAlign),
     fontSize: layer.fontSize,
     fontWeight: layer.fontWeight,
@@ -395,7 +405,8 @@ const LayerView = memo(function LayerView({
     WebkitBackgroundClip: layer.gradient ? 'text' : undefined,
     WebkitTextFillColor: layer.gradient ? 'transparent' : undefined,
     color: layer.color,
-    backgroundColor: layer.type === 'shape' ? shapeBg : hasPillBg ? layer.backgroundColor : undefined,
+    background: layer.type === 'shape' ? shapeBg : undefined,
+    backgroundColor: layer.type !== 'shape' && hasPillBg ? layer.backgroundColor : undefined,
     borderRadius: layer.type === 'shape' && !shapeClipPath ? shapeRadius : layer.borderRadius ? `${layer.borderRadius}px` : undefined,
     clipPath: shapeClipPath,
     border: layer.type === 'shape' && !shapeClipPath ? shapeBorder : undefined,

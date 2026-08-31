@@ -146,6 +146,25 @@ export function generateTemplateHTML(model: TemplateModel): GeneratedTemplate {
       } else if (l.fillType === 'glass') {
         bg = l.backgroundColor || 'rgba(15,23,42,0.75)'
       }
+      let clip = ''
+      switch (l.shapeType) {
+        case 'triangle':
+          clip = 'clip-path:polygon(50% 0%, 0% 100%, 100% 100%);-webkit-clip-path:polygon(50% 0%, 0% 100%, 100% 100%);'
+          break
+        case 'star':
+          clip = 'clip-path:polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);-webkit-clip-path:polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);'
+          break
+        case 'hexagon':
+          clip = 'clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);-webkit-clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);'
+          break
+        case 'ribbon':
+        case 'banner':
+          clip = 'clip-path:polygon(0% 0%, 92% 0%, 100% 50%, 92% 100%, 0% 100%, 8% 50%);-webkit-clip-path:polygon(0% 0%, 92% 0%, 100% 50%, 92% 100%, 0% 100%, 8% 50%);'
+          break
+        case 'arrow':
+          clip = 'clip-path:polygon(0% 25%, 65% 25%, 65% 0%, 100% 50%, 65% 100%, 65% 75%, 0% 75%);-webkit-clip-path:polygon(0% 25%, 65% 25%, 65% 0%, 100% 50%, 65% 100%, 65% 75%, 0% 75%);'
+          break
+      }
       const blur = l.backdropBlur || (l.fillType === 'glass' ? 16 : 0)
       const blurStyle = blur ? `backdrop-filter:blur(${blur}px);-webkit-backdrop-filter:blur(${blur}px);` : ''
       const border = l.strokeWidth ? `border:${l.strokeWidth}px ${l.strokeStyle || 'solid'} ${l.strokeColor || '#ffffff'};` : (l.border ? `border:${l.border};` : '')
@@ -157,13 +176,14 @@ export function generateTemplateHTML(model: TemplateModel): GeneratedTemplate {
         shadows.push(`0 0 ${l.glowSpread}px ${l.glowColor || model.accentColor}`)
       }
       const shadowStyle = shadows.length > 0 ? `box-shadow:${shadows.join(', ')};` : ''
-      const height = l.height ? `${l.height}px` : '180px'
+      const height = l.height ? `${l.height}px` : (l.shapeType === 'circle' ? '220px' : '180px')
+      const aspectRatio = l.shapeType === 'circle' ? 'aspect-ratio:1/1;' : ''
       const transforms: string[] = []
       if (l.rotation) transforms.push(`rotate(${l.rotation}deg)`)
       if (l.skewX) transforms.push(`skewX(${l.skewX}deg)`)
       if (l.skewY) transforms.push(`skewY(${l.skewY}deg)`)
       const transformStyle = transforms.length > 0 ? `transform:${transforms.join(' ')};` : ''
-      cssLines.push(`#${id}{height:${height};background:${bg};border-radius:${radius};${border}${blurStyle}${shadowStyle}${transformStyle}}`)
+      cssLines.push(`#${id}{height:${height};background:${bg};border-radius:${radius};${border}${blurStyle}${shadowStyle}${clip}${aspectRatio}${transformStyle}}`)
     }
   })
 
