@@ -857,6 +857,18 @@ export function Canvas({
   }
   const setPercent = (pct: number) => setZoom(pct)
 
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault()
+      const delta = -e.deltaY
+      const factor = delta > 0 ? 1.08 : 0.92
+      setZoom((cur) => {
+        const curScale = cur === 'fit' ? fitScale : cur
+        return Math.max(0.15, Math.min(2.5, curScale * factor))
+      })
+    }
+  }, [fitScale])
+
   const bgLayer = model.layers.find((l) => l.type === 'background')
   const media = bgLayer?.backgroundMedia
   const sorted = [...model.layers].sort((a, b) => {
@@ -885,12 +897,16 @@ export function Canvas({
       </div>
 
       {/* Scrollable viewport */}
-      <div ref={hostRef} className="thin-scroll relative min-h-0 flex-1 overflow-auto flex items-center justify-center p-3">
+      <div
+        ref={hostRef}
+        onWheel={handleWheel}
+        className="thin-scroll relative min-h-0 flex-1 overflow-auto flex items-center justify-center p-3"
+      >
         {isVertical ? (
           <div className="m-auto" style={{ width: (model.width + 32) * scale, height: (model.height + 32) * scale }}>
             {/* Realistic iPhone Device Chassis matching kashida.io */}
             <div
-              className="absolute origin-top-left rounded-[56px] p-4 bg-[#0F172A] shadow-[0_30px_80px_-15px_rgba(15,23,42,0.4)] ring-1 ring-white/20"
+              className="absolute origin-top-left rounded-[56px] p-4 bg-[#0F172A] shadow-[0_30px_80px_-15px_rgba(15,23,42,0.4)] ring-1 ring-white/20 transition-transform duration-100 ease-out"
               style={{ width: model.width + 32, height: model.height + 32, transform: `scale(${scale})` }}
             >
               {/* Dynamic Island Notch */}
