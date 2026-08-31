@@ -58,12 +58,15 @@ import { LayersPanel } from './LayersPanel'
 import { Inspector } from './Inspector'
 import { PlaybackBar } from './PlaybackBar'
 import { ToastContainer, type ToastMessage } from './Toast'
+import { CommandPalette } from './CommandPalette'
 import {
   checkBackend,
   requestRender,
   saveTemplate,
   getRenderStatus,
   flushSaveTemplate,
+  uploadAsset,
+  assetUrl,
   type RenderTask,
 } from '../lib/api'
 
@@ -93,6 +96,7 @@ export function Editor({ initial, onBack, onSaved }: Props) {
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
   const [bumperActive, setBumperActive] = useState(false)
   // Incremented to tell the Inspector to open + reveal the Bumper editor.
   const [bumperFocus, setBumperFocus] = useState(0)
@@ -439,6 +443,55 @@ export function Editor({ initial, onBack, onSaved }: Props) {
     addToast({ type: 'info', title: 'Text Updated', message: 'Applied text directly on canvas', duration: 1500 })
   }, [model.layers, activeRound, updateRound, updateLayer, addToast])
 
+  const handleUploadMediaDirect = useCallback(
+    async (file: File) => {
+      const category = file.type.startsWith('video') ? 'video' : 'image'
+      try {
+        const up = await uploadAsset(category, file)
+        const url = assetUrl(up.category, up.filename)
+        if (activeRound) {
+          updateRound(activeRound.id, {
+            backgroundMedia: {
+              url,
+              type: category as 'image' | 'video',
+              fit: 'cover',
+              scale: 1,
+              posX: 50,
+              posY: 50,
+            },
+          })
+        }
+        addToast({
+          type: 'success',
+          title: 'Media Dropped',
+          message: `Applied ${file.name} to background`,
+          duration: 2500,
+        })
+      } catch {
+        const blobUrl = URL.createObjectURL(file)
+        if (activeRound) {
+          updateRound(activeRound.id, {
+            backgroundMedia: {
+              url: blobUrl,
+              type: category as 'image' | 'video',
+              fit: 'cover',
+              scale: 1,
+              posX: 50,
+              posY: 50,
+            },
+          })
+        }
+        addToast({
+          type: 'info',
+          title: 'Media Preview',
+          message: 'Loaded local preview (backend offline)',
+          duration: 2000,
+        })
+      }
+    },
+    [activeRound, updateRound, addToast]
+  )
+
   // --- save -------------------------------------------------------------------
   const doSave = useCallback(
     async (silent = false, createVersion = false) => {
@@ -568,6 +621,13 @@ export function Editor({ initial, onBack, onSaved }: Props) {
         e.preventDefault()
         if (clock.playing) clock.pause()
         else clock.play()
+        return
+      }
+
+      // Ctrl+K / Cmd+K: Command Palette
+      if (isCtrlOrMeta && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault()
+        setCommandPaletteOpen((o) => !o)
         return
       }
 
@@ -1334,6 +1394,7 @@ export function Editor({ initial, onBack, onSaved }: Props) {
               onBringForwardLayer={bringForward}
               onSendBackwardLayer={sendBackward}
               onUpdateLayerText={updateLayerDirectText}
+              onUploadMedia={handleUploadMediaDirect}
               playheadRef={clock.playheadRef}
               playing={clock.playing}
               roundOffsets={roundOffsets}
@@ -1456,6 +1517,10 @@ export function Editor({ initial, onBack, onSaved }: Props) {
                 <span className="font-semibold text-slate-700">Inline Edit Text</span>
                 <kbd className="rounded-md border border-slate-200 bg-white px-2 py-0.5 font-mono text-[11px] font-bold text-slate-800 shadow-2xs">Double Click</kbd>
               </div>
+              <div className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5">
+                <span className="font-semibold text-slate-700">Command Palette</span>
+                <kbd className="rounded-md border border-slate-200 bg-white px-2 py-0.5 font-mono text-[11px] font-bold text-slate-800 shadow-2xs">Ctrl + K</kbd>
+              </div>
             </div>
 
             <div className="mt-5 flex justify-end">
@@ -1470,6 +1535,27 @@ export function Editor({ initial, onBack, onSaved }: Props) {
           </div>
         </div>
       )}
+
+      {/* Command Palette (Ctrl+K / Cmd+K) */}
+      <CommandPalette
+        open={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        model={model}
+        selectedId={selectedId}
+        activeRound={activeRound}
+        onSelectLayer={setSelectedId}
+        onAddLayer={addLayer}
+        onUpdateLayer={updateLayer}
+        onUpdateTemplate={updateTemplate}
+        onAddRound={addRound}
+        onDuplicateRound={duplicateRound}
+        onTogglePlay={() => {
+          if (clock.playing) clock.pause()
+          else clock.play()
+        }}
+        onSave={() => doSave(false, true)}
+        onExport={doRender}
+      />
     </div>
   )
 }

@@ -41,6 +41,26 @@ function cssAlign(ta: TextAlign): 'right' | 'left' | 'center' {
   return ta === 'start' ? 'right' : ta === 'end' ? 'left' : 'center'
 }
 
+function renderFormattedText(text: string, accent: string) {
+  if (!text) return null
+  const parts = text.split(/(\*[^*]+\*)/g)
+  return parts.map((part, i) => {
+    if (part.startsWith('*') && part.endsWith('*')) {
+      const clean = part.slice(1, -1)
+      return (
+        <mark
+          key={i}
+          className="rounded-xl px-2.5 py-0.5 shadow-md inline-block font-black text-white mx-1"
+          style={{ background: accent }}
+        >
+          {clean}
+        </mark>
+      )
+    }
+    return <span key={i}>{part}</span>
+  })
+}
+
 type Registry = Map<string, (t: number, isNextRound?: boolean) => void>
 
 interface LayerViewProps {
@@ -516,11 +536,11 @@ const LayerView = memo(function LayerView({
                   {layer.animation.type === 'word-stagger' && layer.text ? (
                     layer.text.trim().split(/\s+/).map((w, wi) => (
                       <span key={wi} className="inline-block px-1">
-                        {w}{' '}
+                        {renderFormattedText(w, accent)}{' '}
                       </span>
                     ))
                   ) : (
-                    layer.text || ''
+                    renderFormattedText(layer.text || '', accent)
                   )}
                 </span>
               )
@@ -832,6 +852,7 @@ interface CanvasProps {
   onBringForwardLayer?: (id: string) => void
   onSendBackwardLayer?: (id: string) => void
   onUpdateLayerText?: (id: string, text: string) => void
+  onUploadMedia?: (file: File) => void
   playheadRef: MutableRefObject<number>
   playing: boolean
   roundOffsets?: { id: string; start: number; duration: number }[]
@@ -871,6 +892,7 @@ export function Canvas({
   onBringForwardLayer,
   onSendBackwardLayer,
   onUpdateLayerText,
+  onUploadMedia,
   playheadRef,
   playing,
   roundOffsets,
@@ -884,7 +906,78 @@ export function Canvas({
   const [guides, setGuides] = useState(false)
   const [activeGuide, setActiveGuide] = useState<{ v?: boolean; h?: boolean } | null>(null)
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; layerId: string } | null>(null)
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
+  const [isSpacePressed, setIsSpacePressed] = useState(false)
+  const panStartRef = useRef<{ x: number; y: number; startPanX: number; startPanY: number } | null>(null)
+  const [isPanning, setIsPanning] = useState(false)
   const isVertical = model.width === 1080 && model.height === 1920
+
+  // Listen for Spacebar key to toggle Hand / Pan tool
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeTag = (document.activeElement?.tagName || '').toLowerCase()
+      if (activeTag === 'input' || activeTag === 'textarea') return
+      if (e.code === 'Space' && !e.repeat) {
+        setIsSpacePressed(true)
+      }
+    }
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        setIsSpacePressed(false)
+        setIsPanning(false)
+        panStartRef.current = null
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [])
+
+  const startPan = useCallback(
+    (e: ReactPointerEvent) => {
+      if (isSpacePressed || e.button === 1) {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsPanning(true)
+        panStartRef.current = { x: e.clientX, y: e.clientY, startPanX: pan.x, startPanY: pan.y }
+
+        const move = (ev: PointerEvent) => {
+          if (!panStartRef.current) return
+          const dx = ev.clientX - panStartRef.current.x
+          const dy = ev.clientY - panStartRef.current.y
+          setPan({ x: panStartRef.current.startPanX + dx, y: panStartRef.current.startPanY + dy })
+        }
+        const up = () => {
+          setIsPanning(false)
+          panStartRef.current = null
+          window.removeEventListener('pointermove', move)
+          window.removeEventListener('pointerup', up)
+        }
+        window.addEventListener('pointermove', move)
+        window.addEventListener('pointerup', up)
+      }
+    },
+    [isSpacePressed, pan.x, pan.y]
+  )
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'copy'
+  }, [])
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      const file = e.dataTransfer.files?.[0]
+      if (file && onUploadMedia) {
+        onUploadMedia(file)
+      }
+    },
+    [onUploadMedia]
+  )
 
   const handleContextMenu = useCallback((e: ReactMouseEvent, id: string) => {
     e.preventDefault()
@@ -1022,10 +1115,21 @@ export function Canvas({
       <div
         ref={hostRef}
         onWheel={handleWheel}
-        className="thin-scroll relative min-h-0 flex-1 overflow-auto flex items-center justify-center p-3"
+        onPointerDown={startPan}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+        style={{ cursor: isSpacePressed || isPanning ? (isPanning ? 'grabbing' : 'grab') : 'default' }}
+        className="thin-scroll relative min-h-0 flex-1 overflow-auto flex items-center justify-center p-3 select-none"
       >
         {isVertical ? (
-          <div className="m-auto" style={{ width: (model.width + 32) * scale, height: (model.height + 32) * scale }}>
+          <div
+            className="m-auto transition-transform duration-75"
+            style={{
+              width: (model.width + 32) * scale,
+              height: (model.height + 32) * scale,
+              transform: pan.x || pan.y ? `translate(${pan.x}px, ${pan.y}px)` : undefined,
+            }}
+          >
             {/* Realistic iPhone Device Chassis matching kashida.io */}
             <div
               className="absolute origin-top-left rounded-[56px] p-4 bg-[#0F172A] shadow-[0_30px_80px_-15px_rgba(15,23,42,0.4)] ring-1 ring-white/20 transition-transform duration-100 ease-out"

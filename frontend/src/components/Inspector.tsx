@@ -1293,8 +1293,102 @@ function RoundEditor({
               rows={3}
               onChange={(e) => updateRound(round.id, { headline: e.target.value })}
               className="preview-ar w-full resize-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-[15px] font-bold text-slate-900 focus:border-[#1E56A0] focus:ring-2 focus:ring-[#1E56A0]/15 focus:outline-none leading-relaxed shadow-2xs"
-              placeholder="Enter headline text…"
+              placeholder="Enter headline text… (use *word* to highlight)"
             />
+
+            {/* 4-Mode Kashida & Word Highlight */}
+            <div className="flex flex-wrap items-center gap-1.5 mt-2">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Kashida:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  const cleaned = round.headline.replace(/ـ/g, '')
+                  updateRound(round.id, { headline: cleaned })
+                }}
+                className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                Off
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const cleaned = round.headline.replace(/ـ/g, '')
+                  const light = cleaned.replace(/([بتثجحخسشصضطظعغفقكلمنهي])([بتثجحخسشصضطظعغفقكلمنهيى])/g, (m, a, b, idx) => idx % 2 === 0 ? `${a}ـ${b}` : m)
+                  updateRound(round.id, { headline: light })
+                }}
+                className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                Light
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const cleaned = round.headline.replace(/ـ/g, '')
+                  const medium = cleaned.replace(/([بتثجحخسشصضطظعغفقكلمنهي])([بتثجحخسشصضطظعغفقكلمنهيى])/g, '$1ـ$2')
+                  updateRound(round.id, { headline: medium })
+                }}
+                className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                Medium
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const cleaned = round.headline.replace(/ـ/g, '')
+                  const max = cleaned.replace(/([بتثجحخسشصضطظعغفقكلمنهي])([بتثجحخسشصضطظعغفقكلمنهيى])/g, '$1ــ$2')
+                  updateRound(round.id, { headline: max })
+                }}
+                className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                Max
+              </button>
+              <button
+                type="button"
+                title="Wrap word with * for news broadcast highlight"
+                onClick={() => {
+                  if (!round.headline.includes('*')) {
+                    updateRound(round.id, { headline: `*عاجل* ${round.headline}` })
+                  }
+                }}
+                className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 hover:bg-amber-100 transition-colors cursor-pointer ml-auto"
+              >
+                ✨ *Highlight*
+              </button>
+            </div>
+
+            {/* Readability & Word Count Meter */}
+            <div className="mt-2 rounded-xl bg-slate-50 border border-slate-200/80 p-2.5">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 mb-1.5">
+                <span>
+                  {round.headline.length} chars · {round.headline.trim() ? round.headline.trim().split(/\s+/).length : 0} words
+                </span>
+                <span className={
+                  round.headline.length >= 30 && round.headline.length <= 70
+                    ? 'text-emerald-700 font-bold bg-emerald-100/70 px-2 py-0.5 rounded-full'
+                    : round.headline.length < 30
+                    ? 'text-amber-700 font-semibold bg-amber-100/70 px-2 py-0.5 rounded-full'
+                    : 'text-rose-700 font-semibold bg-rose-100/70 px-2 py-0.5 rounded-full'
+                }>
+                  {round.headline.length >= 30 && round.headline.length <= 70
+                    ? '✓ Optimal Pacing'
+                    : round.headline.length < 30
+                    ? 'Short'
+                    : 'Long (Split)'}
+                </span>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-slate-200 overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-300 rounded-full ${
+                    round.headline.length >= 30 && round.headline.length <= 70
+                      ? 'bg-emerald-500'
+                      : round.headline.length < 30
+                      ? 'bg-amber-500'
+                      : 'bg-rose-500'
+                  }`}
+                  style={{ width: `${Math.min(100, (round.headline.length / 80) * 100)}%` }}
+                />
+              </div>
+            </div>
           </Field>
           <Field label="Subheadline / Source">
             <div className="flex items-center justify-between mb-1.5">

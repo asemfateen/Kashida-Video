@@ -4,8 +4,8 @@
     "name": "🎴 بطاقة ريلز إخبارية (Reel News Card)",
     "description": "قالب بطاقة الأخبار العريضة لريلز وتيك توك مع حركة الكلمات المتقطعة وشارة خاصة",
     "version": 1,
-    "created_at": 1788168140.178,
-    "updated_at": 1788168140.178,
+    "created_at": 1788169064.681,
+    "updated_at": 1788169064.681,
     "tags": [
       "starter",
       "broadcast"
@@ -46,7 +46,7 @@
     },
     "layers": [
       {
-        "id": "75ibzi2c",
+        "id": "ujhdq4xf",
         "name": "Background media",
         "type": "background",
         "visible": true,
@@ -71,7 +71,7 @@
         "overlayOpacity": 0.45
       },
       {
-        "id": "69kjnsb4",
+        "id": "cyn7cb78",
         "name": "Brand Logo",
         "type": "logo",
         "visible": true,
@@ -95,7 +95,7 @@
         "text": "عربي21"
       },
       {
-        "id": "au6rtbga",
+        "id": "pxttjjl4",
         "name": "Special Badge",
         "type": "label",
         "visible": true,
@@ -121,7 +121,7 @@
         "backgroundColor": "#E41E3F"
       },
       {
-        "id": "max2cluf",
+        "id": "gjnkr7eb",
         "name": "Solid Red News Card",
         "type": "card",
         "visible": true,
@@ -149,7 +149,7 @@
         "height": 280
       },
       {
-        "id": "bui4u0mp",
+        "id": "107g2yqr",
         "name": "Main Headline",
         "type": "headline",
         "visible": true,
@@ -174,7 +174,7 @@
         "text": "مراسم دفن 10 من ضحايا مذبحة سربرنيتسا"
       },
       {
-        "id": "uvqv3qm3",
+        "id": "r30jkh7r",
         "name": "Subheadline",
         "type": "subheadline",
         "visible": true,
@@ -198,7 +198,7 @@
         "text": "تغطية ميدانية مباشرة للفعاليات والمراسم الرسمية"
       },
       {
-        "id": "0sdkdq9m",
+        "id": "fzqjxff6",
         "name": "Source Attribution",
         "type": "footer",
         "visible": true,
@@ -224,7 +224,7 @@
     ],
     "rounds": [
       {
-        "id": "eg6fpplx",
+        "id": "3872kbl8",
         "name": "First Round",
         "headline": "مراسم دفن 10 من ضحايا مذبحة سربرنيتسا",
         "subheadline": "تغطية ميدانية مباشرة للفعاليات والمراسم الرسمية",

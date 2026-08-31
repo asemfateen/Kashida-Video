@@ -4,8 +4,8 @@
     "name": "⚽ كبسولات ريلز الرياضية (Stacked Highlight Pills)",
     "description": "قالب الكبسولات الملوّنة المتراكمة لعناوين الريلز والرياضة والترندات مع شارة المونديال والمصدر",
     "version": 1,
-    "created_at": 1788168140.179,
-    "updated_at": 1788168140.179,
+    "created_at": 1788169064.682,
+    "updated_at": 1788169064.682,
     "tags": [
       "starter",
       "broadcast"
@@ -46,7 +46,7 @@
     },
     "layers": [
       {
-        "id": "hfr2152s",
+        "id": "t0zhm3zu",
         "name": "Background media",
         "type": "background",
         "visible": true,
@@ -71,7 +71,7 @@
         "overlayOpacity": 0.3
       },
       {
-        "id": "qmsz6ilw",
+        "id": "4cephtor",
         "name": "Brand Logo",
         "type": "logo",
         "visible": true,
@@ -95,7 +95,7 @@
         "text": "عربي21"
       },
       {
-        "id": "4p3dsisj",
+        "id": "y1rto5h5",
         "name": "Tournament Badge",
         "type": "label",
         "visible": true,
@@ -121,7 +121,7 @@
         "backgroundColor": "#7C3AED"
       },
       {
-        "id": "njnch538",
+        "id": "k3taklt4",
         "name": "Credit & Date",
         "type": "timestamp",
         "visible": true,
@@ -145,7 +145,7 @@
         "text": "@20minxo 🎥 · 2026-07-10"
       },
       {
-        "id": "lj0a1agb",
+        "id": "oky9z224",
         "name": "Location Tag",
         "type": "subheadline",
         "visible": true,
@@ -169,7 +169,7 @@
         "text": "أمريكا 📍"
       },
       {
-        "id": "rkjlu83q",
+        "id": "nd6boap7",
         "name": "Pill 1 — Top Purple Action",
         "type": "headline",
         "visible": true,
@@ -196,7 +196,7 @@
         "height": 70
       },
       {
-        "id": "t6kpf5av",
+        "id": "n8i5gr1m",
         "name": "Pill 2 — Middle Orange Subject",
         "type": "subheadline",
         "visible": true,
@@ -223,7 +223,7 @@
         "height": 70
       },
       {
-        "id": "2h9p3065",
+        "id": "p99ytz49",
         "name": "Pill 3 — Bottom Orange Object",
         "type": "footer",
         "visible": true,

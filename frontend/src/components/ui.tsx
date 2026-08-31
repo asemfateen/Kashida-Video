@@ -1,5 +1,6 @@
 // Small reusable form controls used across the inspector & panels.
 import { useState, type ReactNode } from 'react'
+import { Pipette } from 'lucide-react'
 
 export function Section({ title, children, defaultOpen = true }: { title: string; children: ReactNode; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen)
@@ -79,6 +80,20 @@ export function Slider({ label, value, onChange, min, max, step = 1, unit, disab
 }
 
 export function ColorInput({ label, value, onChange }: { label?: string; value: string; onChange: (v: string) => void }) {
+  const hasEyeDropper = typeof window !== 'undefined' && 'EyeDropper' in window
+
+  const pickColor = async () => {
+    try {
+      const eyeDropper = new (window as any).EyeDropper()
+      const result = await eyeDropper.open()
+      if (result?.sRGBHex) {
+        onChange(result.sRGBHex)
+      }
+    } catch {
+      // User cancelled
+    }
+  }
+
   return (
     <div className="flex items-center gap-2">
       {label && <span className="min-w-[64px] text-[12px] font-medium text-slate-600">{label}</span>}
@@ -94,8 +109,18 @@ export function ColorInput({ label, value, onChange }: { label?: string; value: 
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-20 bg-transparent text-[12px] font-medium text-slate-700 focus:outline-none"
+          className="w-20 font-mono text-[12px] font-semibold text-slate-800 outline-none"
         />
+        {hasEyeDropper && (
+          <button
+            type="button"
+            onClick={pickColor}
+            title="Pick color from canvas or screen"
+            className="flex h-5 w-5 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer"
+          >
+            <Pipette size={12} />
+          </button>
+        )}
       </div>
     </div>
   )
