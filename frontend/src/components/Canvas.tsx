@@ -655,20 +655,15 @@ const LayerView = memo(function LayerView({
 
       {/* Figma/Canva-Clean Selection Bounding Box with Outward Offset */}
       {selected && layer.type !== 'background' && (
-        <div className="pointer-events-none absolute -inset-3 rounded-md border-2 border-[#1E56A0] shadow-[0_0_0_1px_rgba(255,255,255,0.7)]">
-          {/* Layer Name Tag (Prominent & easy to read on scaled canvas) */}
-          <div className="absolute -top-14 left-0 flex items-center gap-2 rounded-xl bg-[#1E56A0] px-4 py-1.5 text-[24px] font-black text-white shadow-xl ring-2 ring-white/50 tracking-wide select-none">
-            <span>{layer.name}</span>
-          </div>
-
+        <div className="pointer-events-none absolute -inset-2 rounded-md border-2 border-[#1E56A0] shadow-[0_0_0_1px_rgba(255,255,255,0.7)]">
           {/* 4 Crisp Corner Handles (Figma Square / Pill Handles placed on outer offset box) */}
           <div
-            className="pointer-events-auto absolute -left-1.5 -top-1.5 h-3 w-3 cursor-nwse-resize rounded-xs border border-[#1E56A0] bg-white shadow-xs hover:scale-150 transition-transform z-30"
+            className="pointer-events-auto absolute -left-1.5 -top-1.5 h-3.5 w-3.5 cursor-nwse-resize rounded-xs border-2 border-[#1E56A0] bg-white shadow-xs hover:scale-150 transition-transform z-30"
             onPointerDown={(e) => startResize(e, 'nw')}
             title="Drag corner to resize"
           />
           <div
-            className="pointer-events-auto absolute -right-1.5 -top-1.5 h-3 w-3 cursor-nesw-resize rounded-xs border border-[#1E56A0] bg-white shadow-xs hover:scale-150 transition-transform z-30"
+            className="pointer-events-auto absolute -right-1.5 -top-1.5 h-3.5 w-3.5 cursor-nesw-resize rounded-xs border-2 border-[#1E56A0] bg-white shadow-xs hover:scale-150 transition-transform z-30"
             onPointerDown={(e) => startResize(e, 'ne')}
             title="Drag corner to resize"
           />
