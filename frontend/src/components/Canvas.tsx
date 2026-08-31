@@ -1216,10 +1216,41 @@ export function Canvas({
                         />
                       ))}
                     {guides && (
-                      <div className="pointer-events-none absolute inset-0 z-20">
-                        <div className="absolute inset-[6%] border border-dashed border-primary/50" />
-                        <div className="absolute left-1/2 top-0 h-full w-px bg-primary/25" />
-                        <div className="absolute left-0 top-1/2 h-px w-full bg-primary/25" />
+                      <div className="pointer-events-none absolute inset-0 z-20 select-none font-sans">
+                        {/* Safe Zone Center Dashed Box */}
+                        <div className="absolute top-[160px] bottom-[340px] left-[40px] right-[110px] border-2 border-dashed border-[#F59E0B]/80 rounded-3xl bg-[#F59E0B]/5 flex flex-col justify-between p-5">
+                          <div className="flex items-center justify-between text-[14px] font-black text-[#F59E0B] tracking-wider uppercase drop-shadow-md">
+                            <span>🛡️ 9:16 Social Safe Zone</span>
+                            <span>No UI Deadzone</span>
+                          </div>
+                          <div className="text-center text-[13px] font-bold text-[#F59E0B]/90">
+                            Keep Headlines, Cards & Lower-Thirds Inside This Box
+                          </div>
+                        </div>
+
+                        {/* Top Header Deadzone */}
+                        <div className="absolute top-0 left-0 right-0 h-[140px] bg-rose-500/10 border-b border-rose-500/30 flex items-center justify-center">
+                          <span className="text-[12px] font-bold text-rose-300">Top Header & Search Bar Deadzone</span>
+                        </div>
+
+                        {/* Right-Side Action Sidebar (TikTok / Reels Icons) */}
+                        <div className="absolute top-[420px] bottom-[360px] right-2 w-[90px] bg-rose-500/10 border-l border-rose-500/30 rounded-2xl flex flex-col items-center justify-around py-3">
+                          <div className="w-8 h-8 rounded-full bg-white/20 border border-white/40 flex items-center justify-center text-[12px]">👤</div>
+                          <div className="w-8 h-8 rounded-full bg-white/20 border border-white/40 flex items-center justify-center text-[12px]">❤️</div>
+                          <div className="w-8 h-8 rounded-full bg-white/20 border border-white/40 flex items-center justify-center text-[12px]">💬</div>
+                          <div className="w-8 h-8 rounded-full bg-white/20 border border-white/40 flex items-center justify-center text-[12px]">↗️</div>
+                          <span className="text-[9px] font-bold text-rose-300">Social UI</span>
+                        </div>
+
+                        {/* Bottom Caption Deadzone */}
+                        <div className="absolute bottom-0 left-0 right-0 h-[320px] bg-rose-500/10 border-t border-rose-500/30 flex flex-col items-center justify-center gap-1">
+                          <span className="text-[13px] font-bold text-rose-300">Bottom Captions & Music Disc Deadzone</span>
+                          <span className="text-[11px] text-rose-400/90 font-medium">Keep news text above this line</span>
+                        </div>
+
+                        {/* Center Crosshairs */}
+                        <div className="absolute left-1/2 top-0 h-full w-px bg-blue-400/25" />
+                        <div className="absolute left-0 top-1/2 h-px w-full bg-blue-400/25" />
                       </div>
                     )}
                     <div className="pointer-events-none absolute bottom-2 right-3 text-[11px] text-white/40">

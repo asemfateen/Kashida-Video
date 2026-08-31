@@ -58,6 +58,106 @@ const OUT_PRESETS: { label: string; anim: BumperExitAnimation }[] = [
   { label: 'None', anim: { type: 'none', duration: 0, easing: 'linear', delay: 0 } },
 ]
 
+function AnimPresetCard({
+  preset,
+  selected,
+  onSelect,
+}: {
+  preset: { label: string; anim: EntranceAnimation }
+  selected: boolean
+  onSelect: () => void
+}) {
+  const [hovering, setHovering] = useState(false)
+  const boxRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!hovering || !boxRef.current) return
+    const el = boxRef.current
+    let keyframes: Keyframe[] = []
+    switch (preset.anim.type) {
+      case 'fade-in':
+        keyframes = [{ opacity: 0 }, { opacity: 1 }]
+        break
+      case 'slide-up':
+        keyframes = [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'translateY(0)' }]
+        break
+      case 'slide-down':
+        keyframes = [{ opacity: 0, transform: 'translateY(-12px)' }, { opacity: 1, transform: 'translateY(0)' }]
+        break
+      case 'slide-right':
+        keyframes = [{ opacity: 0, transform: 'translateX(16px)' }, { opacity: 1, transform: 'translateX(0)' }]
+        break
+      case 'zoom-in':
+        keyframes = [{ opacity: 0, transform: 'scale(0.3)' }, { opacity: 1, transform: 'scale(1)' }]
+        break
+      case 'pop-bounce':
+        keyframes = [
+          { opacity: 0, transform: 'scale(0.3)' },
+          { opacity: 1, transform: 'scale(1.2)', offset: 0.6 },
+          { transform: 'scale(0.95)', offset: 0.8 },
+          { transform: 'scale(1)', offset: 1 },
+        ]
+        break
+      case 'flip-up':
+        keyframes = [
+          { opacity: 0, transform: 'perspective(300px) rotateX(90deg)' },
+          { opacity: 1, transform: 'perspective(300px) rotateX(0deg)' },
+        ]
+        break
+      case 'blur-reveal':
+        keyframes = [
+          { opacity: 0, filter: 'blur(6px)', transform: 'scale(0.9)' },
+          { opacity: 1, filter: 'blur(0px)', transform: 'scale(1)' },
+        ]
+        break
+      case 'wipe-rtl':
+        keyframes = [
+          { clipPath: 'inset(0 0 0 100%)', opacity: 0.5 },
+          { clipPath: 'inset(0 0 0 0%)', opacity: 1 },
+        ]
+        break
+      case 'word-stagger':
+        keyframes = [
+          { opacity: 0, transform: 'translateY(8px) scale(0.9)' },
+          { opacity: 1, transform: 'translateY(0) scale(1)' },
+        ]
+        break
+      default:
+        keyframes = [{ opacity: 0 }, { opacity: 1 }]
+    }
+    const anim = el.animate(keyframes, {
+      duration: Math.max(300, (preset.anim.duration || 0.5) * 800),
+      easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+      fill: 'both',
+    })
+    return () => anim.cancel()
+  }, [hovering, preset])
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      className={`group flex flex-col items-center justify-between rounded-xl border p-1.5 text-center transition-all cursor-pointer ${
+        selected
+          ? 'border-[#1E56A0] bg-[#1E56A0]/10 text-[#1E56A0] ring-1 ring-[#1E56A0] shadow-xs'
+          : 'border-slate-200/90 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50/40 hover:text-slate-900'
+      }`}
+    >
+      <div className="flex h-6 w-full items-center justify-center overflow-hidden rounded-md bg-slate-100 mb-1">
+        <div
+          ref={boxRef}
+          className={`h-2.5 w-6 rounded-xs shadow-2xs transition-transform ${
+            selected ? 'bg-[#1E56A0]' : 'bg-slate-400 group-hover:bg-[#1E56A0]'
+          }`}
+        />
+      </div>
+      <span className="text-[10px] font-bold tracking-tight line-clamp-1">{preset.label}</span>
+    </button>
+  )
+}
+
 export function Inspector({
   model,
   selectedId,
@@ -795,18 +895,12 @@ export function Inspector({
           </div>
           <div className="grid grid-cols-3 gap-1.5">
             {ANIM_PRESETS.map((p) => (
-              <button
+              <AnimPresetCard
                 key={p.label}
-                type="button"
-                onClick={() => updateAnimation(layer.id, p.anim)}
-                className={`rounded-xl border px-2.5 py-1.5 text-center text-[11px] font-semibold transition-all ${
-                  layer.animation.type === p.anim.type && layer.animation.duration === p.anim.duration
-                    ? 'border-[#1E56A0] bg-[#1E56A0] text-white shadow-xs'
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900'
-                }`}
-              >
-                {p.label}
-              </button>
+                preset={p}
+                selected={layer.animation.type === p.anim.type && layer.animation.duration === p.anim.duration}
+                onSelect={() => updateAnimation(layer.id, p.anim)}
+              />
             ))}
           </div>
           <Field label="Entrance">
