@@ -23,7 +23,9 @@ def get_assets(category: Optional[str] = None):
 async def upload_new_asset(category: str, file: UploadFile = File(...)):
     data = await file.read()
     try:
-        result = upload_asset(category, file.filename, data)
+        from pathlib import Path
+        safe_name = Path(file.filename).name if file.filename else "upload"
+        result = upload_asset(category, safe_name, data)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     return result

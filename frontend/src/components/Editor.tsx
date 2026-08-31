@@ -838,12 +838,19 @@ export function Editor({ initial, onBack, onSaved }: Props) {
       if (r.duration > 0) p.duration = r.duration
       const media = r.backgroundMedia
       if (media?.url) {
-        if (media.type === 'video') p.videoUrl = media.url
-        else p.imageUrl = media.url
-        p.videoFit = media.fit
-        p.videoScale = media.scale
-        p.videoPositionX = media.posX
-        p.videoPositionY = media.posY
+        if (media.type === 'video') {
+          p.videoUrl = media.url
+          p.videoFit = media.fit
+          p.videoScale = media.scale
+          p.videoPositionX = media.posX
+          p.videoPositionY = media.posY
+        } else {
+          p.imageUrl = media.url
+          p.imageFit = media.fit
+          p.imageScale = media.scale
+          p.imagePositionX = media.posX
+          p.imagePositionY = media.posY
+        }
       }
       return p
     }

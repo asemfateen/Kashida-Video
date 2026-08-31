@@ -6,53 +6,84 @@ from uuid import uuid4
 from fastapi import APIRouter, BackgroundTasks
 from celery.result import AsyncResult
 
+import time
+from collections import OrderedDict
+
 from api.contracts import VideoRequest
 from workers.renderer import render_video
 
 router = APIRouter()
 BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# In-memory store for synchronous/direct fallback tasks
-in_memory_tasks: dict[str, dict] = {}
+
+class _BoundedTaskStore:
+    """LRU-bounded in-memory task store with TTL eviction."""
+
+    def __init__(self, max_size: int = 500, ttl_seconds: float = 3600):
+        self._store: OrderedDict[str, dict] = OrderedDict()
+        self._max = max_size
+        self._ttl = ttl_seconds
+        self._lock = threading.Lock()
+
+    def set(self, task_id: str, data: dict) -> None:
+        entry = {**data, "_ts": time.time()}
+        with self._lock:
+            self._store[task_id] = entry
+            self._store.move_to_end(task_id)
+            while len(self._store) > self._max:
+                self._store.popitem(last=False)
+
+    def get(self, task_id: str) -> dict | None:
+        with self._lock:
+            entry = self._store.get(task_id)
+            if entry is None:
+                return None
+            if time.time() - entry["_ts"] > self._ttl:
+                del self._store[task_id]
+                return None
+            return entry
+
+
+in_memory_tasks = _BoundedTaskStore()
 
 
 def _run_direct_render(task_id: str, json_data: dict):
     output_path = os.path.join(BACKEND_DIR, "static", "videos", f"{task_id}.mp4")
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    in_memory_tasks[task_id] = {
+    in_memory_tasks.set(task_id, {
         "task_id": task_id,
         "status": "STARTED",
         "percent": 10,
         "message": "Initializing direct renderer...",
-    }
+    })
 
     def progress_cb(state, percent, message):
-        in_memory_tasks[task_id] = {
+        in_memory_tasks.set(task_id, {
             "task_id": task_id,
             "status": state,
             "percent": percent,
             "message": message,
-        }
+        })
 
     try:
         result_path = asyncio.run(render_video(task_id, json_data, output_path, progress_cb))
         file_size = os.path.getsize(result_path) if os.path.exists(result_path) else 0
-        in_memory_tasks[task_id] = {
+        in_memory_tasks.set(task_id, {
             "task_id": task_id,
             "output_path": result_path,
             "output_url": f"/videos/{task_id}.mp4",
             "status": "completed",
             "percent": 100,
             "file_size": file_size,
-        }
+        })
     except Exception as e:
-        in_memory_tasks[task_id] = {
+        in_memory_tasks.set(task_id, {
             "task_id": task_id,
             "status": "failed",
             "error": str(e),
             "percent": 0,
-        }
+        })
 
 
 def _get_render_task():
@@ -89,8 +120,8 @@ def render_video_endpoint(body: VideoRequest):
 @router.get("/api/render-video/{task_id}")
 def get_render_status(task_id: str):
     # Check in-memory tasks first
-    if task_id in in_memory_tasks:
-        task_info = in_memory_tasks[task_id]
+    task_info = in_memory_tasks.get(task_id)
+    if task_info is not None:
         return task_info
 
     # Check Celery result

@@ -3,9 +3,9 @@
     "id": "breaking_news",
     "name": "خبر عاجل · Breaking News",
     "description": "قالب الأخبار العاجلة والتغطية المباشرة المفتوحة",
-    "version": 1,
-    "created_at": 1788169064.679,
-    "updated_at": 1788169064.679,
+    "version": 2,
+    "created_at": 1788174881.054,
+    "updated_at": 1788177106.1631322,
     "tags": [
       "starter",
       "broadcast"
@@ -22,7 +22,7 @@
     "backgroundColor": "#0b0b0f",
     "accentColor": "#e63946",
     "bumper": {
-      "enabled": false,
+      "enabled": true,
       "showIntro": true,
       "showInterstitial": true,
       "showOutro": true,
@@ -46,7 +46,7 @@
     },
     "layers": [
       {
-        "id": "psr1404e",
+        "id": "kqf0tinf",
         "name": "Background media",
         "type": "background",
         "visible": true,
@@ -71,7 +71,7 @@
         "overlayOpacity": 0.65
       },
       {
-        "id": "6g44qkaj",
+        "id": "n64e6u2i",
         "name": "Top Red Bar",
         "type": "accentBar",
         "visible": true,
@@ -96,7 +96,7 @@
         "height": 12
       },
       {
-        "id": "9dubaqn8",
+        "id": "nngv5xb5",
         "name": "Brand Logo",
         "type": "logo",
         "visible": true,
@@ -117,10 +117,11 @@
         },
         "persistentStyle": true,
         "animateFirstRoundOnly": true,
-        "text": "كشيدة"
+        "text": "كشيدة",
+        "fontFamily": "'Cairo', sans-serif"
       },
       {
-        "id": "jz09u6dn",
+        "id": "53xwb4jc",
         "name": "Breaking Badge",
         "type": "label",
         "visible": true,
@@ -146,7 +147,7 @@
         "backgroundColor": "#e63946"
       },
       {
-        "id": "z8718twy",
+        "id": "tjv1bmcl",
         "name": "Main Headline",
         "type": "headline",
         "visible": true,
@@ -170,7 +171,7 @@
         "text": "اكتب هنا عنوان الخبر العاجل الرئيسي"
       },
       {
-        "id": "mefqfnun",
+        "id": "b1d27ley",
         "name": "Subheadline",
         "type": "subheadline",
         "visible": true,
@@ -194,7 +195,7 @@
         "text": "تفاصيل إضافية حول التغطية الإخبارية والتطورات الميدانية"
       },
       {
-        "id": "h7sutaqq",
+        "id": "elfg2p0c",
         "name": "Timestamp",
         "type": "timestamp",
         "visible": true,
@@ -218,7 +219,7 @@
         "text": "منذ قليل"
       },
       {
-        "id": "1q8l50g0",
+        "id": "hokco49a",
         "name": "Live Bottom Bar",
         "type": "footer",
         "visible": true,
@@ -244,7 +245,7 @@
     ],
     "rounds": [
       {
-        "id": "wdnh70t6",
+        "id": "ivto14fa",
         "name": "First Round",
         "headline": "اكتب هنا عنوان الخبر العاجل الرئيسي",
         "subheadline": "تفاصيل إضافية حول التغطية الإخبارية والتطورات الميدانية",

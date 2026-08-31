@@ -9,6 +9,7 @@ identifiers (filenames). The renderer resolves assets deterministically.
 
 import mimetypes
 import os
+import re
 from pathlib import Path
 from typing import Optional
 
@@ -22,6 +23,18 @@ ALLOWED_TYPES = {
 }
 
 MAX_FILE_SIZE_MB = 50
+
+# Only filesystem-safe filenames — blocks path traversal, null bytes, shell metacharacters.
+_SAFE_FILENAME_RE = re.compile(r'^[\w\-\.]+$', re.UNICODE)
+
+
+def _sanitize_filename(filename: str) -> str:
+    """Strip directory components and reject unsafe filenames."""
+    from pathlib import Path
+    name = Path(filename).name  # strip any directory prefix (../, ..\\, etc.)
+    if not name or not _SAFE_FILENAME_RE.fullmatch(name):
+        raise ValueError(f"Unsafe filename: {filename!r}")
+    return name
 
 
 def _ensure_dirs():
@@ -38,6 +51,7 @@ def asset_category(filename: str) -> Optional[str]:
 
 
 def upload_asset(category: str, filename: str, data: bytes) -> dict:
+    filename = _sanitize_filename(filename)
     _ensure_dirs()
     if category not in ALLOWED_TYPES:
         raise ValueError(f"Unknown asset category '{category}'")
@@ -62,6 +76,7 @@ def upload_asset(category: str, filename: str, data: bytes) -> dict:
 
 
 def resolve_asset(category: str, filename: str) -> Optional[Path]:
+    filename = _sanitize_filename(filename)
     path = ASSETS_DIR / category / filename
     if path.exists() and path.is_file():
         return path
@@ -87,6 +102,7 @@ def list_assets(category: Optional[str] = None) -> list[dict]:
 
 
 def delete_asset(category: str, filename: str) -> bool:
+    filename = _sanitize_filename(filename)
     path = ASSETS_DIR / category / filename
     if path.exists() and path.is_file():
         path.unlink()
@@ -95,6 +111,7 @@ def delete_asset(category: str, filename: str) -> bool:
 
 
 def validate_asset(category: str, filename: str) -> dict:
+    filename = _sanitize_filename(filename)
     path = resolve_asset(category, filename)
     if path is None:
         return {"valid": False, "error": "not_found"}

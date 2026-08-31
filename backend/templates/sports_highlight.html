@@ -8,15 +8,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=Cairo:wght@400;700;900&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Noto+Naskh+Arabic:wght@400;700&family=Plus+Jakarta+Sans:wght@700;800;900&family=Readex+Pro:wght@400;600;700&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-@font-face{font-family:'Thmanyah Sans';src:url('./fonts/ThmanyahSans-Bold.woff2') format('woff2');font-weight:700;font-style:normal;}
-@font-face{font-family:'Thmanyah Sans';src:url('./fonts/ThmanyahSans-Regular.woff2') format('woff2');font-weight:400;font-style:normal;}
-@font-face{font-family:'Thmanyah Sans';src:url('./fonts/ThmanyahSans-Medium.woff2') format('woff2');font-weight:500;font-style:normal;}
+@font-face{font-family:'Thmanyah Sans';src:url('./fonts/ThmanyahSans-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap;}
+@font-face{font-family:'Thmanyah Sans';src:url('./fonts/ThmanyahSans-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'Thmanyah Sans';src:url('./fonts/ThmanyahSans-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap;}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html, body { width:1080px; height:1920px; overflow:hidden; margin:0; padding:0; background:#06110e; font-family:'Thmanyah Sans','Plus Jakarta Sans',system-ui,sans-serif; direction:rtl; }
 .container{position:relative;width:1080px;height:1920px;background:#06110e;overflow:hidden;}
 .bg-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
 .bg-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(11,11,15,.25) 0%,rgba(11,11,15,.15) 40%,rgba(11,11,15,.9) 100%);pointer-events:none;}
-.el{position:absolute;box-sizing:border-box;will-change:opacity,transform;}
+.el{position:absolute;box-sizing:border-box;will-change:opacity,transform;overflow:visible;}
 .news-scene{position:absolute;inset:0;z-index:2;}
 .bumper-scene{position:absolute;inset:0;z-index:3;display:none;overflow:hidden;}
 #bAcc{position:absolute;left:50%;top:33%;transform:translateX(-50%);width:140px;height:8px;border-radius:10px;}
@@ -47,7 +47,13 @@ html, body { width:1080px; height:1920px; overflow:hidden; margin:0; padding:0; 
      <img class="bg-media" id="bgImage" style="display:none" /></div>
   <div class="bg-overlay" id="bgOverlay"></div>
   <div class="news-scene" id="newsScene">
-<div class="el" id="l0" data-type="logo">كشيدة رياضة</div>,<div class="el" id="l1" data-type="label"><span class="lb"><span class="lb-ar">تغطية رياضية</span><span class="lb-en">SPORTS</span></span></div>,<div class="el" id="l2" data-type="card"></div>,<div class="el" id="l3" data-type="subheadline">🏆 متابعة رياضية حصرية</div>,<div class="el" id="l4" data-type="headline">فوز ساحق وتتويج مستحق في نهائي البطولة</div>,<div class="el" id="l5" data-type="subheadline">أداء بطولي وحسم النتيجة في اللحظات الأخيرة من المباراة</div>,<div class="el" id="l6" data-type="footer"></div>
+<div class="el" id="l0" data-type="logo">كشيدة رياضة</div>
+<div class="el" id="l1" data-type="label"><span class="lb"><span class="lb-ar">تغطية رياضية</span><span class="lb-en">SPORTS</span></span></div>
+<div class="el" id="l2" data-type="card"></div>
+<div class="el" id="l3" data-type="subheadline">🏆 متابعة رياضية حصرية</div>
+<div class="el" id="l4" data-type="headline">فوز ساحق وتتويج مستحق في نهائي البطولة</div>
+<div class="el" id="l5" data-type="subheadline">أداء بطولي وحسم النتيجة في اللحظات الأخيرة من المباراة</div>
+<div class="el" id="l6" data-type="footer"></div>
   </div>
   <div class="bumper-scene" id="bumperScene">
     <div id="bAcc"></div>
@@ -86,7 +92,7 @@ html, body { width:1080px; height:1920px; overflow:hidden; margin:0; padding:0; 
     return new Promise(function(resolve) {
       var im = new Image();
       im.onload = function() { resolve(); };
-      im.onerror = function() { resolve(); };
+      im.onerror = function() { console.warn('Background image failed to load:', url); resolve(); };
       im.src = url;
     });
   }
@@ -113,7 +119,7 @@ html, body { width:1080px; height:1920px; overflow:hidden; margin:0; padding:0; 
     var setWords = function(sel, val) {
       var el = document.querySelector(sel);
       if (el && val) {
-        var words = String(val).trim().split(/s+/);
+        var words = String(val).trim().split(/\s+/);
         el.innerHTML = words.map(function(w){ return '<span class="w" style="display:inline-block">' + w + '</span>'; }).join(' ');
       }
     };
@@ -129,7 +135,12 @@ html, body { width:1080px; height:1920px; overflow:hidden; margin:0; padding:0; 
       bumperScene.style.background = data.backgroundColor || '#06110e';
       var b0 = document.getElementById('b0');
       if (data.logoImageUrl) {
-        b0.innerHTML = '<img src="' + data.logoImageUrl + '" alt="logo" />';
+        b0.textContent = '';
+        var logoImg = document.createElement('img');
+        logoImg.src = data.logoImageUrl;
+        logoImg.alt = 'logo';
+        logoImg.style.cssText = 'max-width:64%;height:auto;object-fit:contain;';
+        b0.appendChild(logoImg);
       } else {
         b0.textContent = data.logoText || 'KASHIDA';
       }
@@ -187,6 +198,12 @@ html, body { width:1080px; height:1920px; overflow:hidden; margin:0; padding:0; 
       if (data.videoFit) vid.style.objectFit = data.videoFit;
       vid.style.objectPosition = (data.videoPositionX ?? 50) + '% ' + (data.videoPositionY ?? 50) + '%';
       vid.style.transform = 'scale(' + (data.videoScale ?? 1) + ')';
+      // Wait for video metadata so seekToFrame can seek correctly
+      await new Promise(function(resolve) {
+        if (vid.readyState >= 1) { resolve(); return; }
+        vid.onloadedmetadata = function() { resolve(); };
+        setTimeout(resolve, 3000);
+      });
     } else if (mediaUrl) {
       img.src = mediaUrl; img.style.display = 'block'; vid.style.display = 'none';
       var imgFit = data.imageFit || data.videoFit;
@@ -224,7 +241,7 @@ html, body { width:1080px; height:1920px; overflow:hidden; margin:0; padding:0; 
     if (vid && vid.src) {
       try {
         vid.pause();
-        if (vid.duration && !isNaN(vid.duration)) vid.currentTime = timeInSeconds % vid.duration;
+        if (vid.duration && !isNaN(vid.duration) && vid.duration > 0) vid.currentTime = timeInSeconds % vid.duration;
         else vid.currentTime = timeInSeconds;
       } catch (e) {}
     }

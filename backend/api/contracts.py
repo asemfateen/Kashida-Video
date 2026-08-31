@@ -136,6 +136,15 @@ class VideoRequest(BaseModel):
                 raise ValueError(f"fps × duration ({total_frames}) exceeds max 1800 frames")
         else:
             # Multi-round validation
+            total_estimated_frames = 0
             for i, r in enumerate(self.rounds):
                 if not r.headline.strip():
                     raise ValueError(f"round[{i}].headline cannot be empty")
+                # Conservative duration estimate: explicit > video default (10s) > image default (5s)
+                round_dur = r.duration if r.duration > 0 else 10.0
+                total_estimated_frames += int(self.fps * round_dur)
+            if total_estimated_frames > 1800:
+                raise ValueError(
+                    f"Estimated total frames ({total_estimated_frames}) exceeds max 1800. "
+                    f"Reduce round count or durations."
+                )

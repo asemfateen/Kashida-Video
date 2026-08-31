@@ -56,7 +56,7 @@ export function generateTemplateHTML(model: TemplateModel): GeneratedTemplate {
   cssLines.push(`.container{position:relative;width:${w}px;height:${h}px;background:${model.backgroundColor};overflow:hidden;}`)
   cssLines.push(`.bg-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}`)
   cssLines.push(`.bg-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(11,11,15,.25) 0%,rgba(11,11,15,.15) 40%,rgba(11,11,15,.9) 100%);pointer-events:none;}`)
-  cssLines.push(`.el{position:absolute;box-sizing:border-box;will-change:opacity,transform;}`)
+  cssLines.push(`.el{position:absolute;box-sizing:border-box;will-change:opacity,transform;overflow:visible;}`)
 
   // Bumper scene — the brand logo + transition interstitial between rounds. The
   // logo entrance animation IS the transition (no crossfade/xfade needed). This
@@ -88,11 +88,15 @@ export function generateTemplateHTML(model: TemplateModel): GeneratedTemplate {
     const fontStyles = isText
       ? `font-size:${l.fontSize}px;font-weight:${l.fontWeight};color:${l.color};${familyStyle}${shadowStyle}${strokeStyle}${gradientStyle}`
       : (l.color ? `color:${l.color};` : '')
+    const lineHeight = (l.type === 'headline' || l.type === 'subheadline')
+      ? 'line-height:1.6;'
+      : ''
+    const bidiStyle = isText ? 'unicode-bidi:plaintext;' : ''
     const bgStyle = l.backgroundColor && l.type !== 'accentBar' && l.type !== 'card' && l.type !== 'label'
       ? `background:${l.backgroundColor};border-radius:${l.borderRadius ?? 20}px;padding:12px 24px;display:inline-flex;align-items:center;justify-content:${l.textAlign === 'center' ? 'center' : l.textAlign === 'end' ? 'flex-end' : 'flex-start'};line-height:1.2;box-shadow:0 8px 24px rgba(0,0,0,0.35);`
       : ''
     const heightStyle = l.height && l.type !== 'background' && l.type !== 'accentBar' && l.type !== 'card' ? `height:${l.height}px;` : ''
-    cssLines.push(`#${id}{left:${l.x}%;top:${l.y}%;width:${width};text-align:${align};${fontStyles}${bgStyle}${heightStyle}opacity:${l.opacity};z-index:${i + 2};}`)
+    cssLines.push(`#${id}{left:${l.x}%;top:${l.y}%;width:${width};text-align:${align};${lineHeight}${bidiStyle}${fontStyles}${bgStyle}${heightStyle}opacity:${l.opacity};z-index:${i + 2};}`)
     if (l.type === 'label') {
       cssLines.push(`#${id} .lb{display:inline-flex;align-items:center;gap:14px;background:${bgColor(l) ?? model.accentColor};padding:14px 30px;color:#fff;line-height:1;}`)
       cssLines.push(`#${id} .lb-ar{font-size:${l.fontSize}px;font-weight:700;}`)
@@ -242,7 +246,10 @@ export function generateTemplateHTML(model: TemplateModel): GeneratedTemplate {
       const outStr = Object.keys(out)
         .map((k) => `${k}: ${out[k as keyof typeof out]}`)
         .join(', ')
-      const outStart = Math.max((l.animation.delay || 0) + (l.animation.duration || 0), model.duration - outDur - outDelay)
+      const outStart = Math.min(
+        Math.max(0, model.duration - outDur),
+        Math.max((l.animation.delay || 0) + (l.animation.duration || 0), model.duration - outDur - outDelay)
+      )
       tlCalls.push(
         `  tl.fromTo('${id}', { opacity: ${l.opacity}, x: 0, y: 0, scale: 1 }, { ${outStr}, duration: ${outDur}, ease: '${GSAP_EASING[l.animationOut.easing]}' }, ${outStart.toFixed(3)});`
       )
@@ -315,9 +322,9 @@ export function generateTemplateHTML(model: TemplateModel): GeneratedTemplate {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=Cairo:wght@400;700;900&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Noto+Naskh+Arabic:wght@400;700&family=Plus+Jakarta+Sans:wght@700;800;900&family=Readex+Pro:wght@400;600;700&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-@font-face{font-family:'Thmanyah Sans';src:url('./fonts/ThmanyahSans-Bold.woff2') format('woff2');font-weight:700;font-style:normal;}
-@font-face{font-family:'Thmanyah Sans';src:url('./fonts/ThmanyahSans-Regular.woff2') format('woff2');font-weight:400;font-style:normal;}
-@font-face{font-family:'Thmanyah Sans';src:url('./fonts/ThmanyahSans-Medium.woff2') format('woff2');font-weight:500;font-style:normal;}
+@font-face{font-family:'Thmanyah Sans';src:url('./fonts/ThmanyahSans-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap;}
+@font-face{font-family:'Thmanyah Sans';src:url('./fonts/ThmanyahSans-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'Thmanyah Sans';src:url('./fonts/ThmanyahSans-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap;}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 ${cssLines.join('\n')}
 </style>
@@ -357,7 +364,7 @@ ${bumperTlCalls.join('\n')}
     return new Promise(function(resolve) {
       var im = new Image();
       im.onload = function() { resolve(); };
-      im.onerror = function() { resolve(); };
+      im.onerror = function() { console.warn('Background image failed to load:', url); resolve(); };
       im.src = url;
     });
   }
@@ -400,7 +407,12 @@ ${bumperTlCalls.join('\n')}
       bumperScene.style.background = data.backgroundColor || '${model.backgroundColor}';
       var b0 = document.getElementById('b0');
       if (data.logoImageUrl) {
-        b0.innerHTML = '<img src="' + data.logoImageUrl + '" alt="logo" />';
+        b0.textContent = '';
+        var logoImg = document.createElement('img');
+        logoImg.src = data.logoImageUrl;
+        logoImg.alt = 'logo';
+        logoImg.style.cssText = 'max-width:64%;height:auto;object-fit:contain;';
+        b0.appendChild(logoImg);
       } else {
         b0.textContent = data.logoText || 'KASHIDA';
       }
@@ -450,6 +462,12 @@ ${bumperTlCalls.join('\n')}
       if (data.videoFit) vid.style.objectFit = data.videoFit;
       vid.style.objectPosition = (data.videoPositionX ?? 50) + '% ' + (data.videoPositionY ?? 50) + '%';
       vid.style.transform = 'scale(' + (data.videoScale ?? 1) + ')';
+      // Wait for video metadata so seekToFrame can seek correctly
+      await new Promise(function(resolve) {
+        if (vid.readyState >= 1) { resolve(); return; }
+        vid.onloadedmetadata = function() { resolve(); };
+        setTimeout(resolve, 3000);
+      });
     } else if (mediaUrl) {
       img.src = mediaUrl; img.style.display = 'block'; vid.style.display = 'none';
       var imgFit = data.imageFit || data.videoFit;

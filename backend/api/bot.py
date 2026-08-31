@@ -14,6 +14,8 @@ import json
 import os
 import subprocess
 from pathlib import Path
+import time
+from collections import OrderedDict
 from uuid import uuid4
 from dotenv import load_dotenv
 from telegram import (
@@ -36,12 +38,70 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static" / "videos"
 ASSET_VID_DIR = Path(__file__).resolve().parent.parent / "data" / "assets" / "video"
 ASSET_VID_DIR.mkdir(parents=True, exist_ok=True)
+ASSET_IMG_DIR = Path(__file__).resolve().parent.parent / "data" / "assets" / "image"
+ASSET_IMG_DIR.mkdir(parents=True, exist_ok=True)
 DEFAULT_LOOP_PATH = ASSET_VID_DIR / "breaking_loop.mp4"
 
-USER_SESSIONS = {}
-USER_TEMPLATES: dict[int, str] = {}
+class _TTLStore:
+    """LRU dict with per-entry TTL eviction to prevent memory leaks."""
+
+    def __init__(self, max_size: int = 1000, ttl: float = 3600):
+        self._data: OrderedDict = OrderedDict()
+        self._max = max_size
+        self._ttl = ttl
+
+    def __setitem__(self, key, value):
+        self._data[key] = (value, time.time())
+        self._data.move_to_end(key)
+        while len(self._data) > self._max:
+            self._data.popitem(last=False)
+
+    def __getitem__(self, key):
+        entry = self._data.get(key)
+        if entry is None:
+            raise KeyError(key)
+        val, ts = entry
+        if time.time() - ts > self._ttl:
+            del self._data[key]
+            raise KeyError(key)
+        return val
+
+    def get(self, key, default=None):
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
+    def __contains__(self, key):
+        try:
+            _ = self[key]
+            return True
+        except KeyError:
+            return False
+
+    def pop(self, key, default=None):
+        try:
+            val = self[key]
+            del self._data[key]
+            return val
+        except KeyError:
+            return default
+
+    def setdefault(self, key, default=None):
+        try:
+            return self[key]
+        except KeyError:
+            self[key] = default
+            return default
+
+    def __len__(self):
+        return len(self._data)
+
+
+USER_SESSIONS = _TTLStore(max_size=500, ttl=7200)
+USER_TEMPLATES = _TTLStore(max_size=1000, ttl=86400)
 # Accumulate-model: chat_id -> list of pending news rounds awaiting /generate.
-PENDING_ROUNDS: dict[int, list[dict]] = {}
+PENDING_ROUNDS = _TTLStore(max_size=1000, ttl=7200)
 
 from api.templates import list_templates, load_template
 
@@ -431,7 +491,7 @@ async def handle_media_or_text(update: Update, context):
         status_prep = await message.reply_text("📥 جاري تحويل الصورة لخلفية... ⏳")
         photo = message.photo[-1]
         photo_filename = f"tg_{media_task_id}.jpg"
-        photo_path = ASSET_VID_DIR / photo_filename
+        photo_path = ASSET_IMG_DIR / photo_filename
 
         try:
             telegram_file = await context.bot.get_file(photo.file_id)
@@ -671,7 +731,19 @@ async def generate_cmd(update: Update, context):
     # Consume the queue now; the payload is captured in USER_SESSIONS.
     PENDING_ROUNDS[chat_id] = []
 
-    await process_render_job(context.bot, chat_id, task_id, video_data)
+    try:
+        await process_render_job(context.bot, chat_id, task_id, video_data)
+    except Exception as e:
+        # Restore the rounds so the user doesn't lose their work
+        PENDING_ROUNDS.setdefault(chat_id, []).extend(rounds)
+        ar_err = format_arabic_error(e)
+        await context.bot.send_message(
+            chat_id,
+            f"❌ حدث خطأ غير متوقع:\n{ar_err}\n\n"
+            "💡 تم استعادة الأخبار إلى قائمة الانتظار.",
+            reply_markup=get_main_keyboard(),
+            parse_mode="Markdown",
+        )
 
 
 async def process_render_job(bot, chat_id: int, task_id: str, video_data: dict):

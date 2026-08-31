@@ -3,6 +3,9 @@ import gc
 import os
 import re
 import shutil
+import threading
+import time
+import urllib.parse
 
 import ffmpeg
 from playwright.async_api import async_playwright
@@ -47,6 +50,63 @@ TEMPLATE_ID_RE = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
 # Default duration for a round whose background is an image (or has no media).
 IMAGE_ROUND_SECONDS = 5.0
 
+# Disk cleanup: max age (seconds) and max total size (bytes) for rendered videos.
+_VIDEO_MAX_AGE = 2 * 3600  # 2 hours
+_VIDEO_MAX_SIZE = 500 * 1024 * 1024  # 500 MB
+_VIDEOS_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "static", "videos",
+)
+
+
+def _cleanup_old_videos():
+    """Delete rendered videos older than 2 hours or when total size exceeds 500 MB."""
+    if not os.path.isdir(_VIDEOS_DIR):
+        return
+    now = time.time()
+    try:
+        entries = []
+        for fname in os.listdir(_VIDEOS_DIR):
+            if not fname.endswith(".mp4"):
+                continue
+            fpath = os.path.join(_VIDEOS_DIR, fname)
+            if not os.path.isfile(fpath):
+                continue
+            try:
+                mtime = os.path.getmtime(fpath)
+                size = os.path.getsize(fpath)
+            except OSError:
+                continue
+            entries.append((fpath, mtime, size))
+
+        # Pass 1: delete files older than _VIDEO_MAX_AGE.
+        for fpath, mtime, _size in entries:
+            if now - mtime > _VIDEO_MAX_AGE:
+                try:
+                    os.remove(fpath)
+                except OSError:
+                    pass
+
+        # Pass 2: if total size still exceeds limit, delete oldest first.
+        remaining = [
+            (fpath, mtime, size)
+            for fpath, mtime, size in entries
+            if os.path.exists(fpath)
+        ]
+        total = sum(size for _, _, size in remaining)
+        if total > _VIDEO_MAX_SIZE:
+            remaining.sort(key=lambda e: e[1])  # oldest mtime first
+            for fpath, _mtime, size in remaining:
+                if total <= _VIDEO_MAX_SIZE:
+                    break
+                try:
+                    os.remove(fpath)
+                    total -= size
+                except OSError:
+                    pass
+    except Exception:
+        pass  # Non-fatal — cleanup is best-effort.
+
 
 def _resolve_template_path(json_data: dict) -> str:
     """Map the requested template id to a real .html file on disk.
@@ -68,9 +128,9 @@ def _resolve_template_path(json_data: dict) -> str:
 
 
 def _local_path(url: str) -> str:
-    """Strip a ``file://`` prefix so ffprobe/ffmpeg can read the path."""
+    """Strip a ``file://`` prefix and URL-decode so ffprobe/ffmpeg can read the path."""
     if url.startswith("file://"):
-        return url[len("file://"):]
+        return urllib.parse.unquote(url[len("file://"):])
     return url
 
 
@@ -79,8 +139,17 @@ def _probe_video_duration(url: str) -> float | None:
     if not url:
         return None
     try:
-        probe = ffmpeg.probe(_local_path(url))
-        return float(probe["format"]["duration"])
+        import subprocess as _sp
+        result = _sp.run(
+            ["ffprobe", "-v", "quiet", "-print_format", "json",
+             "-show_format", _local_path(url)],
+            capture_output=True, text=True, timeout=10,
+        )
+        import json as _json
+        probe = _json.loads(result.stdout)
+        dur = float(probe["format"]["duration"])
+        # Clamp to sane range — no single round should exceed 30s for news.
+        return dur if 0 < dur <= 30 else None
     except Exception:
         return None
 
@@ -113,10 +182,11 @@ def _round_segment(round_dict: dict, index: int, fps: int) -> dict:
     onward (matching the frontend preview).
     """
     round_dict = {**round_dict, "roundIndex": index}
+    dur = _round_duration(round_dict)
     return {
         "data": round_dict,
-        "duration": _round_duration(round_dict),
-        "frames": max(1, int(_round_duration(round_dict) * fps)),
+        "duration": dur,
+        "frames": max(1, round(dur * fps)),
     }
 
 
@@ -165,6 +235,18 @@ def _interleave_bumpers(round_segments: list, bumper: dict, fps: int, json_data:
     return segs
 
 
+def _ensure_fonts_symlink(template_path: str):
+    """Create a symlink to fonts/ next to the template if it doesn't exist."""
+    template_dir = os.path.dirname(template_path)
+    fonts_link = os.path.join(template_dir, "fonts")
+    fonts_source = os.path.join(TEMPLATE_DIR, "fonts")
+    if not os.path.exists(fonts_link) and os.path.exists(fonts_source):
+        try:
+            os.symlink(fonts_source, fonts_link)
+        except OSError:
+            pass  # Already exists or permission denied — non-fatal
+
+
 def _has_audio(url: str) -> bool:
     """Check if the media file has a valid audio stream."""
     if not url:
@@ -177,6 +259,40 @@ def _has_audio(url: str) -> bool:
         return False
     except Exception:
         return False
+
+
+# Persistent browser cache — avoids 2-3s Chromium cold-start per render.
+# The browser is created once and reused across tasks; contexts are per-render.
+_cached_browser = None
+_cached_playwright = None
+_browser_lock = threading.Lock()
+
+
+async def _get_or_launch_browser():
+    """Return a reusable Chromium instance, launching one if needed."""
+    global _cached_browser, _cached_playwright
+    with _browser_lock:
+        if _cached_browser:
+            try:
+                if _cached_browser.is_connected():
+                    return _cached_browser
+            except Exception:
+                pass
+            # Browser is dead — clean up
+            try:
+                if _cached_playwright:
+                    await _cached_playwright.stop()
+            except Exception:
+                pass
+            _cached_browser = None
+            _cached_playwright = None
+
+        _cached_playwright = await async_playwright().start()
+        _cached_browser = await _cached_playwright.chromium.launch(
+            args=CHROMIUM_LOW_RAM_FLAGS,
+            headless=True,
+        )
+        return _cached_browser
 
 
 def _encode_frames(frame_dir: str, fps: int, output_path: str, audio_source: str = None, duration: float = None):
@@ -219,9 +335,8 @@ def _encode_frames(frame_dir: str, fps: int, output_path: str, audio_source: str
                 .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
             )
             return
-        except Exception:
-            # Fall back to silent audio track if audio stream muxing fails
-            pass
+        except Exception as e:
+            print(f"[WARN] Audio muxing failed, falling back to silent: {e}")
 
     # Generate with synchronized silent audio track for consistent multi-segment stitching
     silent_audio = ffmpeg.input("anullsrc=r=44100:cl=stereo", f="lavfi", t=dur)
@@ -252,7 +367,9 @@ def _concat_segments(segment_files: list[str], output_path: str):
     try:
         with open(list_path, "w") as f:
             for p in segment_files:
-                f.write(f"file '{p}'\n")
+                # FFmpeg concat format: escape single quotes by doubling them per the spec.
+                escaped = p.replace("\\", "\\\\").replace("'", "'\\''")
+                f.write(f"file '{escaped}'\n")
         (
             ffmpeg
             .input(list_path, format="concat", safe=0)
@@ -274,6 +391,11 @@ async def render_video(task_id: str, json_data: dict, output_path: str,
     into a single MP4.
     """
     template_path = _resolve_template_path(json_data)
+    # Ensure fonts/ dir is accessible relative to the template (for templates
+    # served from backend/data/templates/ which don't have a fonts/ subdir).
+    _ensure_fonts_symlink(template_path)
+    # Clean up old rendered videos to prevent disk bloat.
+    _cleanup_old_videos()
     # Defensive clamping (the HTTP API path is already validated by Pydantic;
     # this protects the bot path, which builds the payload itself).
     try:
@@ -319,7 +441,7 @@ async def render_video(task_id: str, json_data: dict, output_path: str,
             {
                 "data": {**json_data, "roundIndex": 0},
                 "duration": duration,
-                "frames": max(1, int(duration * fps)),
+                "frames": max(1, round(duration * fps)),
             }
         ]
         bumper = json_data.get("bumper") or {}
@@ -331,58 +453,89 @@ async def render_video(task_id: str, json_data: dict, output_path: str,
 
     total_frames = sum(s["frames"] for s in segments)
 
+    # Defense-in-depth: enforce frame cap even when Pydantic is bypassed (bot path).
+    MAX_FRAMES = 1800
+    if total_frames > MAX_FRAMES:
+        raise RuntimeError(
+            f"Total frames ({total_frames}) exceeds hard cap of {MAX_FRAMES}. "
+            f"Reduce round count or durations."
+        )
+
     browser = None
     try:
         if progress_callback:
             progress_callback("STARTED", 0, "Launching browser...")
 
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(
-                args=CHROMIUM_LOW_RAM_FLAGS,
-                headless=True,
+        browser = await _get_or_launch_browser()
+        context = await browser.new_context(
+            viewport={"width": width, "height": height},
+            device_scale_factor=1,
+        )
+        page = await context.new_page()
+
+        if progress_callback:
+            progress_callback("RENDERING", 0, "Loading template...")
+
+        await page.goto(f"file://{template_path}", wait_until="domcontentloaded")
+
+        # Wait for all fonts (especially Arabic Thmanyah Sans) to fully load
+        # before taking any screenshots. Without this, early frames render
+        # with fallback system fonts (Arial/Times) — a branding catastrophe
+        # for a product whose moat is Arabic typography.
+        try:
+            await asyncio.wait_for(
+                page.evaluate("document.fonts.ready.then(() => document.body.offsetHeight)"),
+                timeout=10,
             )
-            context = await browser.new_context(
-                viewport={"width": width, "height": height},
-                device_scale_factor=1,
-            )
-            page = await context.new_page()
+        except asyncio.TimeoutError:
+            pass  # Proceed with fallback fonts rather than blocking forever
+
+        captured = 0
+        for seg_idx, seg in enumerate(segments):
+            seg_dir = os.path.join(frame_root, f"round_{seg_idx}")
+            os.makedirs(seg_dir, exist_ok=True)
 
             if progress_callback:
-                progress_callback("RENDERING", 0, "Loading template...")
+                progress_callback(
+                    "RENDERING",
+                    0,
+                    f"Round {seg_idx + 1}/{len(segments)}: loading news data...",
+                )
 
-            await page.goto(f"file://{template_path}", wait_until="domcontentloaded")
+            try:
+                await asyncio.wait_for(
+                    page.evaluate("(data) => window.loadNewsData(data)", seg["data"]),
+                    timeout=15,
+                )
+            except asyncio.TimeoutError:
+                raise RuntimeError(f"loadNewsData timed out for segment {seg_idx}")
 
-            captured = 0
-            for seg_idx, seg in enumerate(segments):
-                seg_dir = os.path.join(frame_root, f"round_{seg_idx}")
-                os.makedirs(seg_dir, exist_ok=True)
+            for i in range(seg["frames"]):
+                try:
+                    await asyncio.wait_for(
+                        page.evaluate(f"window.seekToFrame({i}, {fps})"),
+                        timeout=5,
+                    )
+                except asyncio.TimeoutError:
+                    raise RuntimeError(
+                        f"seekToFrame timed out at frame {i}/{seg['frames']} "
+                        f"in segment {seg_idx}. Template GSAP timeline may be broken."
+                    )
+                frame_path = os.path.join(seg_dir, f"frame_{i:04d}.jpg")
+                await asyncio.wait_for(
+                    page.screenshot(path=frame_path, type="jpeg", quality=95),
+                    timeout=10,
+                )
+                captured += 1
 
-                if progress_callback:
+                if progress_callback and captured % max(1, total_frames // 10) == 0:
+                    pct = int(captured / total_frames * 100)
                     progress_callback(
                         "RENDERING",
-                        0,
-                        f"Round {seg_idx + 1}/{len(segments)}: loading news data...",
+                        pct,
+                        f"Frame {captured}/{total_frames} "
+                        f"(round {seg_idx + 1}/{len(segments)})",
                     )
-
-                await page.evaluate("(data) => window.loadNewsData(data)", seg["data"])
-
-                for i in range(seg["frames"]):
-                    await page.evaluate(f"window.seekToFrame({i}, {fps})")
-                    frame_path = os.path.join(seg_dir, f"frame_{i:04d}.jpg")
-                    await page.screenshot(path=frame_path, type="jpeg", quality=88)
-                    captured += 1
-
-                    if progress_callback and captured % max(1, total_frames // 10) == 0:
-                        pct = int(captured / total_frames * 100)
-                        progress_callback(
-                            "RENDERING",
-                            pct,
-                            f"Frame {captured}/{total_frames} "
-                            f"(round {seg_idx + 1}/{len(segments)})",
-                        )
-
-            await browser.close()
-            browser = None
 
         if progress_callback:
             progress_callback("ENCODING", 0, "Stitching frames into video...")
@@ -414,6 +567,25 @@ async def render_video(task_id: str, json_data: dict, output_path: str,
                         audio_source=segments[seg_idx]["data"].get("videoUrl"),
                         duration=segments[seg_idx]["duration"],
                     )
+                    # Verify audio params match for safe concat (c=copy).
+                    try:
+                        probe = ffmpeg.probe(seg_mp4)
+                        audio_streams = [s for s in probe.get("streams", []) if s.get("codec_type") == "audio"]
+                        if audio_streams:
+                            sr = audio_streams[0].get("sample_rate", "44100")
+                            ch = audio_streams[0].get("channels", 2)
+                            if sr != "44100" or ch != 2:
+                                print(f"[WARN] Segment {seg_idx} audio mismatch: {sr}Hz/{ch}ch, re-encoding")
+                                fixed = seg_mp4 + ".fixed.mp4"
+                                (
+                                    ffmpeg
+                                    .input(seg_mp4)
+                                    .output(fixed, vcodec="copy", acodec="aac", ar=44100, ac=2)
+                                    .run(overwrite_output=True, capture_stdout=True, capture_stderr=True)
+                                )
+                                os.replace(fixed, seg_mp4)
+                    except Exception as e:
+                        print(f"[WARN] Audio param check failed for segment {seg_idx}: {e}")
                     segment_files.append(seg_mp4)
                 _concat_segments(segment_files, output_path)
             finally:
@@ -432,11 +604,11 @@ async def render_video(task_id: str, json_data: dict, output_path: str,
         return output_path
 
     finally:
-        if browser is not None:
-            try:
-                await browser.close()
-            except Exception:
-                pass
+        # Close the per-render context (not the browser — it's cached).
+        try:
+            await context.close()
+        except Exception:
+            pass
         if os.path.exists(frame_root):
             shutil.rmtree(frame_root, ignore_errors=True)
             print(f"[{task_id}] Cleaned up frame directory")
