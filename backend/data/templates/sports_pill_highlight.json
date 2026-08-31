@@ -1,0 +1,282 @@
+{
+  "meta": {
+    "id": "sports_pill_highlight",
+    "name": "⚽ كبسولات ريلز الرياضية (Stacked Highlight Pills)",
+    "description": "قالب الكبسولات الملوّنة المتراكمة لعناوين الريلز والرياضة والترندات مع شارة المونديال والمصدر",
+    "version": 1,
+    "created_at": 1788118656.731,
+    "updated_at": 1788118656.731,
+    "tags": [
+      "starter",
+      "broadcast"
+    ]
+  },
+  "data": {
+    "id": "sports_pill_highlight",
+    "name": "⚽ كبسولات ريلز الرياضية (Stacked Highlight Pills)",
+    "description": "قالب الكبسولات الملوّنة المتراكمة لعناوين الريلز والرياضة والترندات مع شارة المونديال والمصدر",
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "duration": 5,
+    "backgroundColor": "#0b0b0f",
+    "accentColor": "#7C3AED",
+    "bumper": {
+      "enabled": true,
+      "showIntro": false,
+      "showInterstitial": false,
+      "showOutro": true,
+      "duration": 3.5,
+      "backgroundColor": "#F8FAFC",
+      "accentColor": "#E41E3F",
+      "logoText": "عربي21",
+      "slogan": "f · 𝕏 ·  ·  ·  | Arabi21News · www.Arabi21.com",
+      "animation": {
+        "type": "zoom-in",
+        "duration": 0.6,
+        "delay": 0.1,
+        "easing": "ease-out"
+      },
+      "animationOut": {
+        "type": "none",
+        "duration": 0,
+        "delay": 0,
+        "easing": "linear"
+      }
+    },
+    "layers": [
+      {
+        "id": "unpyuoor",
+        "name": "Background media",
+        "type": "background",
+        "visible": true,
+        "locked": false,
+        "x": 0,
+        "y": 0,
+        "width": 100,
+        "textAlign": "center",
+        "fontSize": 72,
+        "fontWeight": 700,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "none",
+          "duration": 0,
+          "delay": 0,
+          "easing": "linear"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "height": 100,
+        "overlayOpacity": 0.3
+      },
+      {
+        "id": "9j959pye",
+        "name": "Brand Logo",
+        "type": "logo",
+        "visible": true,
+        "locked": false,
+        "x": 8,
+        "y": 18,
+        "width": 0,
+        "textAlign": "start",
+        "fontSize": 52,
+        "fontWeight": 900,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.4,
+          "delay": 0.05,
+          "easing": "ease-out"
+        },
+        "persistentStyle": true,
+        "animateFirstRoundOnly": true,
+        "text": "عربي21"
+      },
+      {
+        "id": "6vq2uk6j",
+        "name": "Tournament Badge",
+        "type": "label",
+        "visible": true,
+        "locked": false,
+        "x": 65,
+        "y": 18,
+        "width": 0,
+        "textAlign": "center",
+        "fontSize": 24,
+        "fontWeight": 700,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "wipe-rtl",
+          "duration": 0.45,
+          "delay": 0.1,
+          "easing": "ease-out"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "labelAr": "مونديال 🏆",
+        "labelEn": "",
+        "backgroundColor": "#7C3AED"
+      },
+      {
+        "id": "bzaa39vp",
+        "name": "Credit & Date",
+        "type": "timestamp",
+        "visible": true,
+        "locked": false,
+        "x": 68,
+        "y": 25,
+        "width": 26,
+        "textAlign": "end",
+        "fontSize": 18,
+        "fontWeight": 700,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.35,
+          "delay": 0.2,
+          "easing": "ease-out"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "text": "@20minxo 🎥 · 2026-07-10"
+      },
+      {
+        "id": "dk02s2dr",
+        "name": "Location Tag",
+        "type": "subheadline",
+        "visible": true,
+        "locked": false,
+        "x": 52,
+        "y": 52,
+        "width": 40,
+        "textAlign": "end",
+        "fontSize": 28,
+        "fontWeight": 900,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "pop-bounce",
+          "duration": 0.4,
+          "delay": 0.1,
+          "easing": "ease-out"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "text": "أمريكا 📍"
+      },
+      {
+        "id": "ch1p4c6y",
+        "name": "Pill 1 — Top Purple Action",
+        "type": "headline",
+        "visible": true,
+        "locked": false,
+        "x": 18,
+        "y": 58.5,
+        "width": 64,
+        "textAlign": "center",
+        "fontSize": 38,
+        "fontWeight": 900,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "wipe-rtl",
+          "duration": 0.45,
+          "delay": 0.15,
+          "easing": "ease-out"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "text": "مشجع برازيلي يهدي",
+        "backgroundColor": "#7C3AED",
+        "borderRadius": 22,
+        "height": 70
+      },
+      {
+        "id": "vorsgeoe",
+        "name": "Pill 2 — Middle Orange Subject",
+        "type": "subheadline",
+        "visible": true,
+        "locked": false,
+        "x": 15,
+        "y": 66,
+        "width": 70,
+        "textAlign": "center",
+        "fontSize": 38,
+        "fontWeight": 900,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "wipe-rtl",
+          "duration": 0.45,
+          "delay": 0.28,
+          "easing": "ease-out"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "text": "كيليان مبابي قميص",
+        "backgroundColor": "#EA580C",
+        "borderRadius": 22,
+        "height": 70
+      },
+      {
+        "id": "xwfzfu1h",
+        "name": "Pill 3 — Bottom Orange Object",
+        "type": "footer",
+        "visible": true,
+        "locked": false,
+        "x": 23,
+        "y": 73.5,
+        "width": 54,
+        "textAlign": "center",
+        "fontSize": 38,
+        "fontWeight": 900,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "wipe-rtl",
+          "duration": 0.45,
+          "delay": 0.4,
+          "easing": "ease-out"
+        },
+        "persistentStyle": true,
+        "animateFirstRoundOnly": true,
+        "text": "منتخب البرازيل",
+        "backgroundColor": "#EA580C",
+        "borderRadius": 22,
+        "height": 70
+      }
+    ],
+    "rounds": [
+      {
+        "id": "r1",
+        "name": "مشهد 1: العنوان الرئيسي",
+        "headline": "مشجع برازيلي يهدي",
+        "subheadline": "كيليان مبابي قميص",
+        "labelAr": "مونديال 🏆",
+        "labelEn": "",
+        "timestamp": "",
+        "accentColor": "#7C3AED",
+        "backgroundColor": "#0b0b0f",
+        "overlayOpacity": 0.55,
+        "duration": 6
+      },
+      {
+        "id": "r2",
+        "name": "مشهد 2: تصريح وتعريف اللاعب",
+        "headline": "شكرًا كيليان",
+        "subheadline": "كيليان مبابي · لاعب كرة قدم فرنسي",
+        "labelAr": "مونديال 🏆",
+        "labelEn": "",
+        "timestamp": "",
+        "accentColor": "#EA580C",
+        "backgroundColor": "#0b0b0f",
+        "overlayOpacity": 0.55,
+        "duration": 7.5
+      }
+    ]
+  }
+}

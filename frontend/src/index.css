@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Thmanyah Sans';
+  src: url('/fonts/ThmanyahSans-Bold.woff2') format('woff2');
+  font-weight: 700 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Thmanyah Sans';
+  src: url('/fonts/ThmanyahSans-Medium.woff2') format('woff2');
+  font-weight: 500 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Thmanyah Sans';
+  src: url('/fonts/ThmanyahSans-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* ---------------------------------------------------------------------------
+   Kashida Studio — Light design tokens (derived from kashida.io landing page)
+   Primary royal blue #1E56A0, ice-blue canvas #F4F7FB, white floating cards,
+   Plus Jakarta Sans for UI, Thmanyah for Arabic preview.
+--------------------------------------------------------------------------- */
+@theme {
+  --color-bg: #edf3fa;
+  --color-surface: #ffffff;
+  --color-surface-2: #f8fafc;
+  --color-surface-3: #e8eff8;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-ink: #0b1728;
+  --color-ink-2: #475569;
+  --color-muted: #64748b;
+  --color-primary: #1e56a0;
+  --color-primary-hover: #16437e;
+  --color-primary-soft: #eff6ff;
+  --color-accent: #c9a25e;
+  --color-danger: #ef4444;
+  --color-danger-soft: #fef2f2;
+  --color-success: #10b981;
+  --color-midnight: #0b1528;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at 50% -10%, #f0f6fc 0%, #edf3fa 60%, #e6edf7 100%);
+  background-attachment: fixed;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Arabic preview font stack (news content) — Thmanyah with system fallbacks */
+.preview-ar {
+  font-family: "Thmanyah Sans", "Plus Jakarta Sans", "Segoe UI", Tahoma, system-ui, sans-serif;
+}
+
+/* Canvas layer element — absolutely positioned so left/top percentages work */
+.el {
+  position: absolute;
+  box-sizing: border-box;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Hide scrollbars (for horizontally scrollable capsule bars) */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Thin scrollbars for panels */
+.thin-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.thin-scroll::-webkit-scrollbar-thumb { background: #cfd9e6; border-radius: 8px; }
+.thin-scroll::-webkit-scrollbar-thumb:hover { background: #b6c3d4; }
+.thin-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* Range inputs */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 9999px;
+  background: #d7e0ec;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(15,30,51,.25);
+  cursor: pointer;
+}
+input[type="range"]:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Native color input reset */
+input[type="color"] {
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  padding: 0;
+  background: none;
+}
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: none; border-radius: 6px; }
+
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

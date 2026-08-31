@@ -1,0 +1,264 @@
+{
+  "meta": {
+    "id": "opinion_quote",
+    "name": "اقتباس وتصريح · Quote & Statement",
+    "description": "قالب اقتباس التصريحات الرسمية ببطاقة زجاجية فاخرة",
+    "version": 1,
+    "created_at": 1788118656.723,
+    "updated_at": 1788118656.723,
+    "tags": [
+      "starter",
+      "broadcast"
+    ]
+  },
+  "data": {
+    "id": "opinion_quote",
+    "name": "اقتباس وتصريح · Quote & Statement",
+    "description": "قالب اقتباس التصريحات الرسمية ببطاقة زجاجية فاخرة",
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "duration": 5,
+    "backgroundColor": "#0b0b0f",
+    "accentColor": "#e63946",
+    "bumper": {
+      "enabled": false,
+      "showIntro": true,
+      "showInterstitial": true,
+      "showOutro": true,
+      "duration": 2,
+      "backgroundColor": "#0b0b0f",
+      "accentColor": "#e63946",
+      "logoText": "KASHIDA",
+      "slogan": "كشيدة · kashida.io",
+      "animation": {
+        "type": "zoom-in",
+        "duration": 0.6,
+        "delay": 0,
+        "easing": "ease-out"
+      },
+      "animationOut": {
+        "type": "fade-out",
+        "duration": 0.5,
+        "delay": 0,
+        "easing": "ease-out"
+      }
+    },
+    "layers": [
+      {
+        "id": "ufgznx9m",
+        "name": "Background media",
+        "type": "background",
+        "visible": true,
+        "locked": false,
+        "x": 0,
+        "y": 0,
+        "width": 100,
+        "textAlign": "center",
+        "fontSize": 72,
+        "fontWeight": 700,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "none",
+          "duration": 0,
+          "delay": 0,
+          "easing": "linear"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "height": 100,
+        "overlayOpacity": 0.65
+      },
+      {
+        "id": "m7eusmh0",
+        "name": "Quote Badge",
+        "type": "label",
+        "visible": true,
+        "locked": false,
+        "x": 8,
+        "y": 4,
+        "width": 0,
+        "textAlign": "start",
+        "fontSize": 22,
+        "fontWeight": 700,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "slide-right",
+          "duration": 0.35,
+          "delay": 0.05,
+          "easing": "ease-out"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "labelAr": "اقتباس وتصريح",
+        "labelEn": "STATEMENT",
+        "backgroundColor": "#e63946"
+      },
+      {
+        "id": "wamv2xs8",
+        "name": "Brand Logo",
+        "type": "logo",
+        "visible": true,
+        "locked": false,
+        "x": 75,
+        "y": 4,
+        "width": 0,
+        "textAlign": "start",
+        "fontSize": 38,
+        "fontWeight": 900,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.3,
+          "delay": 0.05,
+          "easing": "ease-out"
+        },
+        "persistentStyle": true,
+        "animateFirstRoundOnly": true,
+        "text": "كشيدة"
+      },
+      {
+        "id": "j1x167p9",
+        "name": "Frosted Quote Card",
+        "type": "card",
+        "visible": true,
+        "locked": false,
+        "x": 6,
+        "y": 42,
+        "width": 88,
+        "textAlign": "center",
+        "fontSize": 72,
+        "fontWeight": 700,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "slide-up",
+          "duration": 0.4,
+          "delay": 0.1,
+          "easing": "ease-out"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "backgroundColor": "rgba(15,23,42,0.88)",
+        "border": "2px solid rgba(255,255,255,0.18)",
+        "borderRadius": 32,
+        "backdropBlur": 20,
+        "height": 520
+      },
+      {
+        "id": "3cmqtmrx",
+        "name": "Quote Icon",
+        "type": "subheadline",
+        "visible": true,
+        "locked": false,
+        "x": 10,
+        "y": 44,
+        "width": 80,
+        "textAlign": "center",
+        "fontSize": 90,
+        "fontWeight": 900,
+        "color": "#e63946",
+        "opacity": 1,
+        "animation": {
+          "type": "zoom-in",
+          "duration": 0.35,
+          "delay": 0.15,
+          "easing": "ease-out"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "text": "“"
+      },
+      {
+        "id": "32rs7s5x",
+        "name": "Quoted Statement",
+        "type": "headline",
+        "visible": true,
+        "locked": false,
+        "x": 10,
+        "y": 52,
+        "width": 80,
+        "textAlign": "center",
+        "fontSize": 42,
+        "fontWeight": 800,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "slide-up",
+          "duration": 0.4,
+          "delay": 0.2,
+          "easing": "ease-out"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "text": "نعمل بكل عزم وإصرار على تحقيق رؤية التحول والتطوير المستمر"
+      },
+      {
+        "id": "f7oo98ck",
+        "name": "Speaker Attribution",
+        "type": "subheadline",
+        "visible": true,
+        "locked": false,
+        "x": 10,
+        "y": 72,
+        "width": 80,
+        "textAlign": "center",
+        "fontSize": 26,
+        "fontWeight": 700,
+        "color": "#e63946",
+        "opacity": 1,
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.35,
+          "delay": 0.3,
+          "easing": "ease-out"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "text": "— تصريح رسمي رفيع المستوى"
+      },
+      {
+        "id": "n3kvh6i4",
+        "name": "Footer Bar",
+        "type": "footer",
+        "visible": true,
+        "locked": false,
+        "x": 0,
+        "y": 96,
+        "width": 100,
+        "textAlign": "start",
+        "fontSize": 22,
+        "fontWeight": 700,
+        "color": "rgba(255,255,255,0.7)",
+        "opacity": 1,
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.3,
+          "delay": 0.3,
+          "easing": "ease-out"
+        },
+        "persistentStyle": true,
+        "animateFirstRoundOnly": true,
+        "text": "STATEMENT LIVE · kashida.io"
+      }
+    ],
+    "rounds": [
+      {
+        "id": "tdooj2y1",
+        "name": "First Round",
+        "headline": "نعمل بكل عزم وإصرار على تحقيق رؤية التحول والتطوير المستمر",
+        "subheadline": "— تصريح رسمي رفيع المستوى",
+        "labelAr": "اقتباس وتصريح",
+        "labelEn": "STATEMENT",
+        "timestamp": "",
+        "accentColor": "#e63946",
+        "backgroundColor": "#0b0b0f",
+        "overlayOpacity": 0.55,
+        "duration": 0
+      }
+    ]
+  }
+}

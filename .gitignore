@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/venv/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing & Coverage
+.pytest_cache/
+backend/.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+backend/.env
+
+# Node & Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+.eslintcache
+
+# Video renderer & Media outputs
+backend/static/videos/*.mp4
+static/videos/*.mp4
+backend/data/assets/**/*
+backend/data/templates/**/versions/
+.temp_frames/
+*.mp4
+*.avi
+*.mov
+
+# Temporary & debug files
+*.log
+dump.rdb
+*.rdb
+.playwright-mcp/
+*.jpg
+*.jpeg
+*.png
+!frontend/public/**/*
+!frontend/src/assets/**/*
+!backend/templates/fonts/**/*
+
+# OS
+.DS_Store
+Thumbs.db
+

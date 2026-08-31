@@ -1,0 +1,278 @@
+{
+  "meta": {
+    "id": "breaking_news-r2",
+    "name": "🚨 خبر عاجل (Breaking News) · v2",
+    "description": "قالب الأخبار العاجلة والتغطية المباشرة المفتوحة",
+    "version": 1,
+    "created_at": 1788005370.9325655,
+    "updated_at": 1788005476.1438017,
+    "tags": []
+  },
+  "data": {
+    "id": "breaking_news-r2",
+    "name": "🚨 خبر عاجل (Breaking News) · v2",
+    "description": "قالب الأخبار العاجلة والتغطية المباشرة المفتوحة",
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "duration": 5,
+    "backgroundColor": "#0b0b0f",
+    "accentColor": "#e63946",
+    "layers": [
+      {
+        "id": "l_bg",
+        "name": "Background",
+        "type": "background",
+        "visible": true,
+        "locked": true,
+        "x": 0,
+        "y": 0,
+        "width": 100,
+        "height": 100,
+        "opacity": 1,
+        "backgroundColor": "#0b0b0f",
+        "overlayOpacity": 0.65,
+        "animation": {
+          "type": "none",
+          "duration": 0,
+          "delay": 0,
+          "easing": "linear"
+        }
+      },
+      {
+        "id": "l_topbar",
+        "name": "Top Red Bar",
+        "type": "accentBar",
+        "visible": true,
+        "locked": false,
+        "x": 0,
+        "y": 0,
+        "width": 100,
+        "height": 12,
+        "opacity": 1,
+        "backgroundColor": "#e63946",
+        "animation": {
+          "type": "none",
+          "duration": 0,
+          "delay": 0,
+          "easing": "linear"
+        }
+      },
+      {
+        "id": "l_logo",
+        "name": "Brand Logo",
+        "type": "logo",
+        "visible": true,
+        "locked": false,
+        "text": "كشيدة",
+        "fontSize": 48,
+        "fontWeight": 900,
+        "color": "#ffffff",
+        "x": 8,
+        "y": 4,
+        "width": 0,
+        "height": 0,
+        "opacity": 1,
+        "textAlign": "start",
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.3,
+          "delay": 0.05,
+          "easing": "ease-out"
+        }
+      },
+      {
+        "id": "l_badge",
+        "name": "Breaking Badge",
+        "type": "label",
+        "visible": true,
+        "locked": false,
+        "labelAr": "عاجل",
+        "labelEn": "BREAKING",
+        "backgroundColor": "#e63946",
+        "fontSize": 24,
+        "fontWeight": 700,
+        "color": "#ffffff",
+        "x": 53.67671659110479,
+        "y": 67.17449561311794,
+        "width": 0,
+        "height": 0,
+        "opacity": 1,
+        "textAlign": "start",
+        "animation": {
+          "type": "slide-right",
+          "duration": 0.35,
+          "delay": 0.1,
+          "easing": "ease-out"
+        }
+      },
+      {
+        "id": "l_head",
+        "name": "Main Headline",
+        "type": "headline",
+        "visible": true,
+        "locked": false,
+        "text": "اكتب هنا عنوان الخبر العاجل الرئيسي",
+        "fontSize": 54,
+        "fontWeight": 900,
+        "color": "#ffffff",
+        "x": 8,
+        "y": 72,
+        "width": 84,
+        "height": 0,
+        "opacity": 1,
+        "textAlign": "start",
+        "animation": {
+          "type": "slide-up",
+          "duration": 0.4,
+          "delay": 0.15,
+          "easing": "ease-out"
+        }
+      },
+      {
+        "id": "l_sub",
+        "name": "Subheadline",
+        "type": "subheadline",
+        "visible": true,
+        "locked": false,
+        "text": "تفاصيل إضافية حول التغطية الإخبارية والتطورات الميدانية",
+        "fontSize": 28,
+        "fontWeight": 600,
+        "color": "rgba(255,255,255,0.85)",
+        "x": 8,
+        "y": 84,
+        "width": 84,
+        "height": 0,
+        "opacity": 1,
+        "textAlign": "start",
+        "animation": {
+          "type": "slide-up",
+          "duration": 0.35,
+          "delay": 0.25,
+          "easing": "ease-out"
+        }
+      },
+      {
+        "id": "l_time",
+        "name": "Timestamp",
+        "type": "timestamp",
+        "visible": true,
+        "locked": false,
+        "text": "منذ قليل",
+        "fontSize": 20,
+        "fontWeight": 400,
+        "color": "rgba(255,255,255,0.6)",
+        "x": 8,
+        "y": 91,
+        "width": 0,
+        "height": 0,
+        "opacity": 1,
+        "textAlign": "start",
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.3,
+          "delay": 0.3,
+          "easing": "ease-out"
+        }
+      },
+      {
+        "id": "l_foot",
+        "name": "Live Bottom Bar",
+        "type": "footer",
+        "visible": true,
+        "locked": false,
+        "text": "LIVE NEWS · kashida.io",
+        "fontSize": 20,
+        "fontWeight": 700,
+        "color": "rgba(255,255,255,0.7)",
+        "x": 0,
+        "y": 96,
+        "width": 100,
+        "height": 0,
+        "opacity": 1,
+        "textAlign": "start",
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.3,
+          "delay": 0.3,
+          "easing": "ease-out"
+        }
+      },
+      {
+        "id": "7oi97o95",
+        "name": "Timestamp",
+        "type": "timestamp",
+        "visible": true,
+        "locked": false,
+        "x": 19.991219577999082,
+        "y": 91.5679750771348,
+        "width": 9,
+        "textAlign": "start",
+        "fontSize": 22,
+        "fontWeight": 400,
+        "color": "rgba(255,255,255,0.3)",
+        "opacity": 1,
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.6,
+          "delay": 0,
+          "easing": "ease-out"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "text": "the logo"
+      },
+      {
+        "id": "rlr717nq",
+        "name": "Footer",
+        "type": "footer",
+        "visible": true,
+        "locked": false,
+        "x": 8,
+        "y": 95.5,
+        "width": 0,
+        "textAlign": "start",
+        "fontSize": 24,
+        "fontWeight": 400,
+        "color": "rgba(255,255,255,0.35)",
+        "opacity": 1,
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.6,
+          "delay": 0,
+          "easing": "ease-out"
+        },
+        "persistentStyle": true,
+        "animateFirstRoundOnly": true,
+        "text": "kashida.io"
+      }
+    ],
+    "rounds": [
+      {
+        "id": "3pbdsx3x",
+        "name": "Next Round 2",
+        "headline": "Main Headline",
+        "subheadline": "Secondary details appear here",
+        "labelAr": "NEWS",
+        "labelEn": "ALERT",
+        "timestamp": "the logo",
+        "accentColor": "#e63946",
+        "backgroundColor": "#0b0b0f",
+        "overlayOpacity": 0.55,
+        "duration": 0
+      },
+      {
+        "id": "r1",
+        "name": "Round 1",
+        "headline": "اكتب هنا عنوان الخبر العاجل الرئيسي",
+        "subheadline": "تفاصيل إضافية حول التغطية الإخبارية والتطورات الميدانية",
+        "labelAr": "عاجل",
+        "labelEn": "BREAKING",
+        "accentColor": "#e63946",
+        "backgroundColor": "#0b0b0f",
+        "timestamp": "منذ قليل",
+        "duration": 0
+      }
+    ]
+  }
+}

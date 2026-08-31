@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>⚽ كبسولات ريلز الرياضية (Stacked Highlight Pills)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=Cairo:wght@400;700;900&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Noto+Naskh+Arabic:wght@400;700&family=Plus+Jakarta+Sans:wght@700;800;900&family=Readex+Pro:wght@400;600;700&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'Thmanyah Sans';src:url('./fonts/ThmanyahSans-Bold.woff2') format('woff2');font-weight:700;font-style:normal;}
+@font-face{font-family:'Thmanyah Sans';src:url('./fonts/ThmanyahSans-Regular.woff2') format('woff2');font-weight:400;font-style:normal;}
+@font-face{font-family:'Thmanyah Sans';src:url('./fonts/ThmanyahSans-Medium.woff2') format('woff2');font-weight:500;font-style:normal;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html, body { width:1080px; height:1920px; overflow:hidden; margin:0; padding:0; background:#0b0b0f; font-family:'Thmanyah Sans','Plus Jakarta Sans',system-ui,sans-serif; direction:rtl; }
+.container{position:relative;width:1080px;height:1920px;background:#0b0b0f;overflow:hidden;}
+.bg-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
+.bg-overlay{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(11,11,15,.25) 0%,rgba(11,11,15,.15) 40%,rgba(11,11,15,.9) 100%);pointer-events:none;}
+.el{position:absolute;box-sizing:border-box;will-change:opacity,transform;}
+.news-scene{position:absolute;inset:0;z-index:2;}
+.bumper-scene{position:absolute;inset:0;z-index:3;display:none;overflow:hidden;}
+#bAcc{position:absolute;left:50%;top:33%;transform:translateX(-50%);width:140px;height:8px;border-radius:10px;}
+#b0{position:absolute;left:0;right:0;top:40%;text-align:center;font-weight:700;font-size:120px;line-height:1.1;color:#fff;}
+#b0 img{max-width:64%;height:auto;object-fit:contain;}
+#b1{position:absolute;left:0;right:0;top:56%;text-align:center;font-weight:400;font-size:34px;color:rgba(255,255,255,.55);}
+#l0{left:8%;top:18%;width:auto;text-align:right;font-size:52px;font-weight:900;color:#ffffff;opacity:1;z-index:2;}
+#l1{left:65%;top:18%;width:auto;text-align:center;font-size:24px;font-weight:700;color:#ffffff;opacity:1;z-index:3;}
+#l1 .lb{display:inline-flex;align-items:center;gap:14px;background:#7C3AED;padding:14px 30px;color:#fff;line-height:1;}
+#l1 .lb-ar{font-size:24px;font-weight:700;}
+#l1 .lb-en{font-size:15px;font-weight:700;opacity:.85;text-transform:uppercase;letter-spacing:3px;}
+#l1 .tournament-badge-wrap{display:inline-flex;position:relative;filter:drop-shadow(0 14px 28px rgba(0,0,0,0.55));}
+#l1 .tournament-badge{display:inline-flex;direction:ltr;align-items:stretch;background:#7C3AED;border-radius:0 9999px 9999px 0;height:76px;}
+#l1 .fifa-tab{background:#000000;border-radius:14px 0 0 0;position:relative;padding:8px 14px 4px 14px;display:flex;align-items:center;justify-content:center;}
+#l1 .fifa-tail{position:absolute;bottom:-16px;left:0;width:0;height:0;border-top:16px solid #000000;border-right:18px solid transparent;}
+#l1 .tournament-text{padding:0 34px 0 22px;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:900;color:#ffffff;direction:rtl;letter-spacing:2px;font-family:'Thmanyah Sans',system-ui,sans-serif;}
+#l2{left:68%;top:25%;width:26%;text-align:left;font-size:18px;font-weight:700;color:#ffffff;opacity:1;z-index:4;}
+#l2 .credit-box{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+#l2 .credit-pill{display:inline-flex;direction:ltr;align-items:stretch;border-radius:10px;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,0.45);}
+#l2 .credit-pill .handle{background:#0B0F19;color:#ffffff;font-size:20px;font-weight:800;padding:6px 14px;font-family:'Plus Jakarta Sans',system-ui,sans-serif;display:flex;align-items:center;}
+#l2 .credit-pill .cam-icon{background:#FF4500;padding:6px 12px;display:flex;align-items:center;justify-content:center;color:#ffffff;}
+#l2 .date-txt{font-size:20px;font-weight:800;color:#ffffff;text-shadow:0 2px 10px rgba(0,0,0,0.85);font-family:'Plus Jakarta Sans',system-ui,sans-serif;letter-spacing:0.5px;text-align:right;}
+#l3{left:52%;top:52%;width:40%;text-align:left;font-size:28px;font-weight:900;color:#ffffff;opacity:1;z-index:5;}
+#l3 .location-pin-badge{display:inline-flex;align-items:center;gap:10px;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.7));}
+#l3 .loc-text{font-size:32px;font-weight:900;color:#ffffff;letter-spacing:1px;font-family:'Thmanyah Sans',sans-serif;}
+#l3 .loc-pin{display:flex;flex-direction:column;align-items:center;position:relative;}
+#l3 .loc-dash{width:18px;height:5px;background:#7C3AED;border-radius:3px;margin-top:-2px;}
+#l4{left:18%;top:58.5%;width:64%;text-align:center;font-size:38px;font-weight:900;color:#ffffff;background:#7C3AED;border-radius:22px;padding:12px 24px;display:inline-flex;align-items:center;justify-content:center;line-height:1.2;box-shadow:0 8px 24px rgba(0,0,0,0.35);height:70px;opacity:1;z-index:6;}
+#l5{left:15%;top:66%;width:70%;text-align:center;font-size:38px;font-weight:900;color:#ffffff;background:#EA580C;border-radius:22px;padding:12px 24px;display:inline-flex;align-items:center;justify-content:center;line-height:1.2;box-shadow:0 8px 24px rgba(0,0,0,0.35);height:70px;opacity:1;z-index:7;}
+#l6{left:23%;top:73.5%;width:54%;text-align:center;font-size:38px;font-weight:900;color:#ffffff;background:#EA580C;border-radius:22px;padding:12px 24px;display:inline-flex;align-items:center;justify-content:center;line-height:1.2;box-shadow:0 8px 24px rgba(0,0,0,0.35);height:70px;opacity:1;z-index:8;}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="bg-media"><video class="bg-media" id="bgVideo" autoplay loop muted playsinline style="display:none"></video>
+     <img class="bg-media" id="bgImage" style="display:none" /></div>
+  <div class="bg-overlay" id="bgOverlay"></div>
+  <div class="news-scene" id="newsScene">
+<div class="el" id="l0" data-type="logo">عربي21</div>,<div class="el" id="l1" data-type="label"><span class="tournament-badge-wrap"><span class="tournament-badge"><span class="fifa-tab"><svg viewBox="0 0 44 54" width="44" height="54" fill="none"><text x="7" y="24" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-weight="900" font-size="28" fill="#FFFFFF">2</text><text x="25" y="24" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-weight="900" font-size="28" fill="#FFFFFF">6</text><path d="M18 6C18 4 20 2 22 2C24 2 26 4 26 6C26 8 28 10 28 14C28 18 24 21 22 21C20 21 16 18 16 14C16 10 18 8 18 6Z" fill="#F59E0B"/><path d="M19 21H25V28H19V21Z" fill="#D97706"/><rect x="17" y="28" width="10" height="4" rx="1" fill="#FFFFFF"/><text x="22" y="44" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-weight="900" font-size="10" fill="#FFFFFF" text-anchor="middle" letter-spacing="1.5">FIFA</text></svg><span class="fifa-tail"></span></span><span class="tournament-text">مونديال</span></span></span></div>,<div class="el" id="l2" data-type="timestamp"><div class="credit-box"><div class="credit-pill"><span class="handle">@20minxo</span><span class="cam-icon">📹</span></div><div class="date-txt">2026-07-10</div></div></div>,<div class="el" id="l3" data-type="subheadline"><span class="location-pin-badge"><span class="loc-text">أمريكا</span><span class="loc-pin"><svg viewBox="0 0 24 24" width="24" height="24" fill="#FFFFFF"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg><span class="loc-dash"></span></span></span></div>,<div class="el" id="l4" data-type="headline">مشجع برازيلي يهدي</div>,<div class="el" id="l5" data-type="subheadline">كيليان مبابي قميص</div>,<div class="el" id="l6" data-type="footer"></div>
+  </div>
+  <div class="bumper-scene" id="bumperScene">
+    <div id="bAcc"></div>
+    <div id="b0">KASHIDA</div>
+    <div id="b1"></div>
+  </div>
+</div>
+<script src="./gsap.min.js"></script>
+<script>
+(function() {
+  var tl = gsap.timeline({ paused: true });
+  tl.fromTo('#l0', { opacity: 0 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.4, ease: 'power2.out' }, 0.05);
+  tl.fromTo('#l1', { opacity: 0, scaleX: 0, transformOrigin: 'right center' }, { opacity: 1, scaleX: 1, duration: 0.45, ease: 'power2.out' }, 0.1);
+  tl.fromTo('#l2', { opacity: 0 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.35, ease: 'power2.out' }, 0.2);
+  tl.fromTo('#l3', { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)' }, 0.1);
+  tl.fromTo('#l4', { opacity: 0, scaleX: 0, transformOrigin: 'right center' }, { opacity: 1, scaleX: 1, duration: 0.45, ease: 'power2.out' }, 0.15);
+  tl.fromTo('#l5', { opacity: 0, scaleX: 0, transformOrigin: 'right center' }, { opacity: 1, scaleX: 1, duration: 0.45, ease: 'power2.out' }, 0.28);
+  tl.fromTo('#l6', { opacity: 0, scaleX: 0, transformOrigin: 'right center' }, { opacity: 1, scaleX: 1, duration: 0.45, ease: 'power2.out' }, 0.4);
+  window.mainTimeline = tl;
+
+  // --- Bumper scene timeline (paused, seeked only in bumper mode) --------------
+  var bt = gsap.timeline({ paused: true });
+  bt.fromTo('#b0', { opacity: 0, scale: 0.8 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.6, ease: 'power2.out' }, 0.1);
+  bt.fromTo('#b1', { opacity: 0, y: 24 }, { opacity: 1, x: 0, y: 0, scale: 1, duration: 0.6, ease: 'power2.out' }, 0.2);
+  bt.fromTo('#bAcc', { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, transformOrigin: 'center', duration: 0.35, ease: 'power2.out' }, 0);
+  window.bumperTimeline = bt;
+
+  // Current scene mode: true → bumper scene, false → news scene.
+  var __isBumperMode = false;
+  window.__isBumperMode = false;
+
+  // Resolve an image before the first screenshot so it is never blank.
+  function preloadImage(url) {
+    if (!url) return Promise.resolve();
+    return new Promise(function(resolve) {
+      var im = new Image();
+      im.onload = function() { resolve(); };
+      im.onerror = function() { resolve(); };
+      im.src = url;
+    });
+  }
+
+  window.loadNewsData = async function(data) {
+    data = data || {};
+    var newsScene = document.getElementById('newsScene');
+    var bumperScene = document.getElementById('bumperScene');
+    var isBumper = !!data.isBumper;
+    __isBumperMode = isBumper;
+    window.__isBumperMode = isBumper;
+
+    // Reset BOTH timelines so no residual inline styles leak between scenes
+    // when switching modes (or when reloading a new round within a mode).
+    window.mainTimeline.pause();
+    window.mainTimeline.seek(0);
+    window.bumperTimeline.pause();
+    window.bumperTimeline.seek(0);
+
+    var setText = function(sel, val) {
+      var el = document.querySelector(sel);
+      if (el && val) el.textContent = val;
+    };
+    var setWords = function(sel, val) {
+      var el = document.querySelector(sel);
+      if (el && val) {
+        var words = String(val).trim().split(/s+/);
+        el.innerHTML = words.map(function(w){ return '<span class="w" style="display:inline-block">' + w + '</span>'; }).join(' ');
+      }
+    };
+    var setProp = function(sel, fn) {
+      var el = document.querySelector(sel);
+      if (el) fn(el);
+    };
+
+    if (isBumper) {
+      // --- Bumper scene ---
+      newsScene.style.display = 'none';
+      bumperScene.style.display = 'block';
+      bumperScene.style.background = data.backgroundColor || '#0b0b0f';
+      var b0 = document.getElementById('b0');
+      if (data.logoImageUrl) {
+        b0.innerHTML = '<img src="' + data.logoImageUrl + '" alt="logo" />';
+      } else {
+        b0.textContent = data.logoText || 'KASHIDA';
+      }
+      document.getElementById('b1').textContent = data.slogan || '';
+      document.getElementById('bAcc').style.background = data.accentColor || '#7C3AED';
+      var bgv = document.getElementById('bgVideo'); if (bgv) bgv.style.display = 'none';
+      var bgi = document.getElementById('bgImage'); if (bgi) bgi.style.display = 'none';
+      var bgo = document.getElementById('bgOverlay'); if (bgo) bgo.style.display = 'none';
+      await preloadImage(data.logoImageUrl);
+      return;
+    }
+
+    // --- News scene ---
+    bumperScene.style.display = 'none';
+    newsScene.style.display = 'block';
+    var bgo = document.getElementById('bgOverlay'); if (bgo) bgo.style.display = 'block';
+
+    // Track which news round we are rendering (0 = first round). Round index is
+    // injected by the renderer for each round segment; bumpers skip this branch.
+    window.__newsRoundIndex = (typeof data.roundIndex === 'number') ? data.roundIndex : 0;
+
+    setText('#l1 .lb-ar', data.labelAr);
+    setText('#l1 .lb-en', data.labelEn);
+    setText('#l2', data.timestamp);
+    setText('#l4', data.headline);
+    setText('#l5', data.subheadline);
+    if (data.accentColor) {
+      setProp('#l1 .lb', function(e){ e.style.background = data.accentColor; });
+    }
+    if (data.backgroundColor) { var c = document.querySelector('.container'); if(c) c.style.background = data.backgroundColor; document.body.style.background = data.backgroundColor; }
+    document.getElementById('bgOverlay').style.opacity = 0.3;
+
+    // Render-time position overrides (legacy + generic).
+    var pos = function(type) {
+      var map = { headline: 'headlinePos', label: 'badgePos', logo: 'logoPos' };
+      var key = map[type];
+      var generic = data.layerPositions && data.layerPositions[type];
+      return generic || (data[key] ? { x: data[key].x, y: data[key].y } : null);
+    };
+    ['headline', 'label', 'logo'].forEach(function(type) {
+      var p = pos(type);
+      if (!p) return;
+      var el = document.querySelector('[data-type="' + type + '"]');
+      if (!el) return;
+      el.style.left = p.x + '%';
+      el.style.top = p.y + '%';
+    });
+
+    // Background media.
+    var mediaUrl = data.videoUrl || data.imageUrl || '';
+    var isVideo = mediaUrl && (data.videoUrl && !data.videoUrl.match(/\.(jpg|jpeg|png|webp|gif)(\?.*)?$/i) || mediaUrl.match(/\.(mp4|webm|mov|m4v)(\?.*)?$/i));
+    var vid = document.getElementById('bgVideo');
+    var img = document.getElementById('bgImage');
+    if (isVideo && mediaUrl) {
+      vid.src = mediaUrl; vid.style.display = 'block'; img.style.display = 'none';
+      if (data.videoFit) vid.style.objectFit = data.videoFit;
+      vid.style.objectPosition = (data.videoPositionX ?? 50) + '% ' + (data.videoPositionY ?? 50) + '%';
+      vid.style.transform = 'scale(' + (data.videoScale ?? 1) + ')';
+    } else if (mediaUrl) {
+      img.src = mediaUrl; img.style.display = 'block'; vid.style.display = 'none';
+      var imgFit = data.imageFit || data.videoFit;
+      if (imgFit) img.style.objectFit = imgFit;
+      var imgX = data.imagePositionX ?? data.videoPositionX ?? 50;
+      var imgY = data.imagePositionY ?? data.videoPositionY ?? 50;
+      img.style.objectPosition = imgX + '% ' + imgY + '%';
+      var imgScale = data.imageScale ?? data.videoScale ?? 1;
+      img.style.transform = 'scale(' + imgScale + ')';
+    }
+    if (data.overlayOpacity !== undefined) {
+      document.getElementById('bgOverlay').style.opacity = data.overlayOpacity;
+    }
+    // Ensure any image background is decoded before the first screenshot.
+    await preloadImage(mediaUrl);
+  };
+
+  window.seekToFrame = function(frameNumber, fps) {
+    var timeInSeconds = frameNumber / fps;
+    if (__isBumperMode) {
+      // Seek the bumper timeline (logo entrance = the transition).
+      window.bumperTimeline.pause();
+      window.bumperTimeline.seek(timeInSeconds);
+      return;
+    }
+    window.mainTimeline.pause();
+    window.mainTimeline.seek(timeInSeconds);
+    // On rounds after the first, hold "animateFirstRoundOnly" layers at their
+    // end state so they don't replay their entrance animation (matches preview).
+    if (window.__newsRoundIndex > 0) {
+      gsap.set('#l0', { opacity: 1, x: 0, y: 0, scale: 1 });
+      gsap.set('#l6', { opacity: 1, x: 0, y: 0, scale: 1 });
+    }
+    var vid = document.getElementById('bgVideo');
+    if (vid && vid.src) {
+      try {
+        vid.pause();
+        if (vid.duration && !isNaN(vid.duration)) vid.currentTime = timeInSeconds % vid.duration;
+        else vid.currentTime = timeInSeconds;
+      } catch (e) {}
+    }
+  };
+})();
+</script>
+</body>
+</html>
