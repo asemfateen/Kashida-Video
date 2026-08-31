@@ -4,8 +4,8 @@
     "name": "خبر عاجل · Breaking News",
     "description": "قالب الأخبار العاجلة والتغطية المباشرة المفتوحة",
     "version": 1,
-    "created_at": 1788118656.72,
-    "updated_at": 1788118656.72,
+    "created_at": 1788167752.415,
+    "updated_at": 1788167752.415,
     "tags": [
       "starter",
       "broadcast"
@@ -46,7 +46,7 @@
     },
     "layers": [
       {
-        "id": "rxjwxn28",
+        "id": "gkff4ugc",
         "name": "Background media",
         "type": "background",
         "visible": true,
@@ -71,7 +71,7 @@
         "overlayOpacity": 0.65
       },
       {
-        "id": "qcqtmth7",
+        "id": "850ec1vt",
         "name": "Top Red Bar",
         "type": "accentBar",
         "visible": true,
@@ -96,7 +96,7 @@
         "height": 12
       },
       {
-        "id": "9y2egogf",
+        "id": "xsvkz8jy",
         "name": "Brand Logo",
         "type": "logo",
         "visible": true,
@@ -120,7 +120,7 @@
         "text": "كشيدة"
       },
       {
-        "id": "80j4f1qo",
+        "id": "rojrnchf",
         "name": "Breaking Badge",
         "type": "label",
         "visible": true,
@@ -146,7 +146,7 @@
         "backgroundColor": "#e63946"
       },
       {
-        "id": "w0ewfgw8",
+        "id": "fuh3sv00",
         "name": "Main Headline",
         "type": "headline",
         "visible": true,
@@ -170,7 +170,7 @@
         "text": "اكتب هنا عنوان الخبر العاجل الرئيسي"
       },
       {
-        "id": "17z1jxmf",
+        "id": "r50qq1xt",
         "name": "Subheadline",
         "type": "subheadline",
         "visible": true,
@@ -194,7 +194,7 @@
         "text": "تفاصيل إضافية حول التغطية الإخبارية والتطورات الميدانية"
       },
       {
-        "id": "6v7sz92s",
+        "id": "srvav22z",
         "name": "Timestamp",
         "type": "timestamp",
         "visible": true,
@@ -218,7 +218,7 @@
         "text": "منذ قليل"
       },
       {
-        "id": "6pl5cpc5",
+        "id": "n78jfzmh",
         "name": "Live Bottom Bar",
         "type": "footer",
         "visible": true,
@@ -244,7 +244,7 @@
     ],
     "rounds": [
       {
-        "id": "b4sipmux",
+        "id": "dpzdr0qx",
         "name": "First Round",
         "headline": "اكتب هنا عنوان الخبر العاجل الرئيسي",
         "subheadline": "تفاصيل إضافية حول التغطية الإخبارية والتطورات الميدانية",

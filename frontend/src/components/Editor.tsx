@@ -9,6 +9,7 @@ import {
   Clapperboard,
   Loader2,
   Plus,
+  Minus,
   CheckCircle2,
   WifiOff,
   AlertTriangle,
@@ -19,6 +20,14 @@ import {
   Redo2,
   Keyboard,
   X,
+  Copy,
+  Trash2,
+  Lock,
+  LockOpen,
+  AlignHorizontalJustifyCenter,
+  AlignRight,
+  AlignCenter,
+  AlignLeft,
 } from 'lucide-react'
 import type { EntranceAnimation, Layer, LayerType, TemplateModel, TemplateRound } from '../lib/model'
 import {
@@ -29,7 +38,9 @@ import {
   duplicateRoundModel,
   alignLayerH,
   alignLayerV,
+  LAYER_TYPE_LABELS,
 } from '../lib/model'
+import { ARABIC_FONTS } from '../lib/fonts'
 import {
   createHistory,
   pushHistory,
@@ -188,6 +199,11 @@ export function Editor({ initial, onBack, onSaved }: Props) {
     }
     return activeRound
   }, [clock.playing, currentSegment, model.rounds, activeRound])
+
+  const selectedLayer = useMemo(
+    () => model.layers.find((l) => l.id === selectedId),
+    [model.layers, selectedId],
+  )
 
   // --- model mutations with undo/redo history --------------------------------
   const updateModel = useCallback((fn: (m: TemplateModel) => TemplateModel, recordHistory = true) => {
@@ -987,6 +1003,204 @@ export function Editor({ initial, onBack, onSaved }: Props) {
         </div>
       </div>
 
+      {/* Canva Dynamic Contextual Property Toolbar */}
+      {selectedLayer && selectedLayer.type !== 'background' && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-blue-200/80 bg-linear-to-r from-blue-50/90 via-white/95 to-slate-50/90 px-4 py-2 shadow-sm backdrop-blur-md animate-in slide-in-from-top-1 duration-150">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Layer Type Badge */}
+            <span className="rounded-lg bg-[#1E56A0] px-2.5 py-1 text-[11px] font-bold text-white shadow-2xs">
+              {LAYER_TYPE_LABELS[selectedLayer.type]}
+            </span>
+
+            {/* Typography Controls for text-capable layers */}
+            {selectedLayer.type !== 'accentBar' && selectedLayer.type !== 'shape' && (
+              <>
+                {/* Font Family Selector */}
+                <select
+                  value={selectedLayer.fontFamily || ARABIC_FONTS[0].family}
+                  onChange={(e) => updateLayer(selectedLayer.id, { fontFamily: e.target.value })}
+                  className="h-8 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-bold text-slate-700 shadow-2xs hover:border-slate-300 focus:outline-none focus:border-[#1E56A0] cursor-pointer"
+                >
+                  {ARABIC_FONTS.map((f) => (
+                    <option key={f.id} value={f.family}>
+                      {f.name}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Font Size Stepper */}
+                <div className="flex items-center rounded-xl border border-slate-200 bg-white shadow-2xs overflow-hidden h-8">
+                  <button
+                    type="button"
+                    onClick={() => updateLayer(selectedLayer.id, { fontSize: Math.max(12, (selectedLayer.fontSize || 48) - 4) })}
+                    className="flex h-full w-7 items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                  >
+                    <Minus size={13} />
+                  </button>
+                  <input
+                    type="number"
+                    value={selectedLayer.fontSize || 48}
+                    onChange={(e) => updateLayer(selectedLayer.id, { fontSize: Number(e.target.value) || 48 })}
+                    className="w-11 text-center text-xs font-bold text-slate-800 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => updateLayer(selectedLayer.id, { fontSize: Math.min(300, (selectedLayer.fontSize || 48) + 4) })}
+                    className="flex h-full w-7 items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                  >
+                    <Plus size={13} />
+                  </button>
+                </div>
+
+                {/* Text Color Swatch & Picker */}
+                <div className="flex items-center gap-1 h-8 rounded-xl border border-slate-200 bg-white px-2 shadow-2xs">
+                  <span className="text-[10px] font-bold text-slate-400">Color</span>
+                  <input
+                    type="color"
+                    value={selectedLayer.color || '#ffffff'}
+                    onChange={(e) => updateLayer(selectedLayer.id, { color: e.target.value })}
+                    className="h-5 w-5 rounded-full border border-slate-200 cursor-pointer p-0 overflow-hidden"
+                  />
+                </div>
+
+                {/* Font Weight B / M / R */}
+                <div className="flex items-center rounded-xl border border-slate-200 bg-white shadow-2xs p-0.5 h-8">
+                  {[
+                    { w: 700, label: 'B' },
+                    { w: 500, label: 'M' },
+                    { w: 400, label: 'R' },
+                  ].map((fw) => (
+                    <button
+                      key={fw.w}
+                      type="button"
+                      onClick={() => updateLayer(selectedLayer.id, { fontWeight: fw.w })}
+                      className={`h-full px-2 rounded-lg text-xs font-bold transition-all ${
+                        (selectedLayer.fontWeight || 700) === fw.w
+                          ? 'bg-[#1E56A0] text-white shadow-2xs'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                      }`}
+                    >
+                      {fw.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Alignment */}
+                <div className="flex items-center rounded-xl border border-slate-200 bg-white shadow-2xs p-0.5 h-8">
+                  <button
+                    type="button"
+                    onClick={() => updateLayer(selectedLayer.id, { textAlign: 'start' })}
+                    title="Right Align (RTL)"
+                    className={`h-full px-2 rounded-lg transition-all ${selectedLayer.textAlign === 'start' ? 'bg-[#1E56A0] text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+                  >
+                    <AlignRight size={13} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateLayer(selectedLayer.id, { textAlign: 'center' })}
+                    title="Center Align"
+                    className={`h-full px-2 rounded-lg transition-all ${selectedLayer.textAlign === 'center' ? 'bg-[#1E56A0] text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+                  >
+                    <AlignCenter size={13} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateLayer(selectedLayer.id, { textAlign: 'end' })}
+                    title="Left Align"
+                    className={`h-full px-2 rounded-lg transition-all ${selectedLayer.textAlign === 'end' ? 'bg-[#1E56A0] text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+                  >
+                    <AlignLeft size={13} />
+                  </button>
+                </div>
+
+                {/* Kashida Tatweel quick slider */}
+                <div className="flex items-center gap-1.5 h-8 rounded-xl border border-slate-200 bg-white px-2.5 shadow-2xs">
+                  <span className="text-[11px] font-bold text-slate-600">كشيدة</span>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={selectedLayer.kashida || 0}
+                    onChange={(e) => updateLayer(selectedLayer.id, { kashida: Number(e.target.value) })}
+                    className="w-16 h-1 accent-[#1E56A0] cursor-pointer"
+                  />
+                  <span className="text-[10px] font-bold text-slate-500 w-6">{selectedLayer.kashida || 0}%</span>
+                </div>
+              </>
+            )}
+
+            {/* Shape Controls */}
+            {selectedLayer.type === 'shape' && (
+              <>
+                <div className="flex items-center gap-1 h-8 rounded-xl border border-slate-200 bg-white px-2 shadow-2xs">
+                  <span className="text-[10px] font-bold text-slate-400">Fill</span>
+                  <input
+                    type="color"
+                    value={selectedLayer.backgroundColor || model.accentColor}
+                    onChange={(e) => updateLayer(selectedLayer.id, { backgroundColor: e.target.value })}
+                    className="h-5 w-5 rounded-full border border-slate-200 cursor-pointer p-0 overflow-hidden"
+                  />
+                </div>
+
+                <div className="flex items-center gap-1.5 h-8 rounded-xl border border-slate-200 bg-white px-2.5 shadow-2xs">
+                  <span className="text-[11px] font-bold text-slate-600">Slant X</span>
+                  <input
+                    type="range"
+                    min={-60}
+                    max={60}
+                    value={selectedLayer.skewX || 0}
+                    onChange={(e) => updateLayer(selectedLayer.id, { skewX: Number(e.target.value) })}
+                    className="w-16 h-1 accent-[#1E56A0] cursor-pointer"
+                  />
+                  <span className="text-[10px] font-bold text-slate-500 w-6">{selectedLayer.skewX || 0}°</span>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Quick Right Action Cluster */}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => alignLayerHorizontal(selectedLayer.id)}
+              title="Center Horizontally"
+              className="flex h-8 items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-slate-300 transition-colors"
+            >
+              <AlignHorizontalJustifyCenter size={13} />
+              <span>Center</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => duplicateLayer(selectedLayer.id)}
+              title="Duplicate (Ctrl+D)"
+              className="flex h-8 items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-slate-300 transition-colors"
+            >
+              <Copy size={13} />
+              <span>Duplicate</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => toggleLock(selectedLayer.id)}
+              title={selectedLayer.locked ? 'Unlock' : 'Lock'}
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-2xs hover:bg-slate-50 transition-colors"
+            >
+              {selectedLayer.locked ? <Lock size={13} className="text-amber-500" /> : <LockOpen size={13} />}
+            </button>
+            {!selectedLayer.locked && (
+              <button
+                type="button"
+                onClick={() => deleteLayer(selectedLayer.id)}
+                title="Delete (Del)"
+                className="flex h-8 w-8 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600 shadow-2xs hover:bg-red-100 transition-colors"
+              >
+                <Trash2 size={13} />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Render result banner */}
       {renderUrl && (
         <div className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-2 shadow-sm">
@@ -1045,6 +1259,12 @@ export function Editor({ initial, onBack, onSaved }: Props) {
               }}
               onMoveLayer={moveLayer}
               onResizeLayer={resizeLayer}
+              onRotateLayer={(id, rotation) => updateLayer(id, { rotation })}
+              onDuplicateLayer={duplicateLayer}
+              onDeleteLayer={deleteLayer}
+              onToggleLockLayer={toggleLock}
+              onAlignHLayer={alignLayerHorizontal}
+              onAlignVLayer={alignLayerVertical}
               playheadRef={clock.playheadRef}
               playing={clock.playing}
               roundOffsets={roundOffsets}

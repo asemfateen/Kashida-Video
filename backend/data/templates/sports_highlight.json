@@ -4,8 +4,8 @@
     "name": "تغطية رياضية · Sports Highlight",
     "description": "قالب التغطيات والبطولات الرياضية الديناميكية",
     "version": 1,
-    "created_at": 1788118656.727,
-    "updated_at": 1788118656.727,
+    "created_at": 1788167752.417,
+    "updated_at": 1788167752.417,
     "tags": [
       "starter",
       "broadcast"
@@ -46,7 +46,7 @@
     },
     "layers": [
       {
-        "id": "9cnwrclz",
+        "id": "flv072li",
         "name": "Background media",
         "type": "background",
         "visible": true,
@@ -71,7 +71,7 @@
         "overlayOpacity": 0.65
       },
       {
-        "id": "zb9q19zm",
+        "id": "2nl0pxma",
         "name": "Sports Logo",
         "type": "logo",
         "visible": true,
@@ -95,7 +95,7 @@
         "text": "كشيدة رياضة"
       },
       {
-        "id": "kndo1gpm",
+        "id": "m23kd3yq",
         "name": "Sports Badge",
         "type": "label",
         "visible": true,
@@ -121,7 +121,7 @@
         "backgroundColor": "#00F5D4"
       },
       {
-        "id": "hl6lin5g",
+        "id": "osyjhngp",
         "name": "Dynamic Sports Card",
         "type": "card",
         "visible": true,
@@ -149,7 +149,7 @@
         "height": 500
       },
       {
-        "id": "c48dsdvd",
+        "id": "6dbxulro",
         "name": "Trophy Header",
         "type": "subheadline",
         "visible": true,
@@ -173,7 +173,7 @@
         "text": "🏆 متابعة رياضية حصرية"
       },
       {
-        "id": "hlzadyml",
+        "id": "e0vka9x0",
         "name": "Sports Headline",
         "type": "headline",
         "visible": true,
@@ -197,7 +197,7 @@
         "text": "فوز ساحق وتتويج مستحق في نهائي البطولة"
       },
       {
-        "id": "xnxqogla",
+        "id": "cxxiw3yf",
         "name": "Match Details Subheadline",
         "type": "subheadline",
         "visible": true,
@@ -221,7 +221,7 @@
         "text": "أداء بطولي وحسم النتيجة في اللحظات الأخيرة من المباراة"
       },
       {
-        "id": "cbvksptv",
+        "id": "hirowj7z",
         "name": "Sports Live Footer",
         "type": "footer",
         "visible": true,
@@ -247,7 +247,7 @@
     ],
     "rounds": [
       {
-        "id": "se73nbnr",
+        "id": "9beju4yu",
         "name": "First Round",
         "headline": "فوز ساحق وتتويج مستحق في نهائي البطولة",
         "subheadline": "أداء بطولي وحسم النتيجة في اللحظات الأخيرة من المباراة",

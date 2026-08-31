@@ -4,8 +4,8 @@
     "name": "تقرير اقتصادي · Economy & Markets",
     "description": "قالب الأسواق والتقارير المالية والمؤشرات الاقتصادية",
     "version": 1,
-    "created_at": 1788118656.724,
-    "updated_at": 1788118656.724,
+    "created_at": 1788167752.416,
+    "updated_at": 1788167752.416,
     "tags": [
       "starter",
       "broadcast"
@@ -46,7 +46,7 @@
     },
     "layers": [
       {
-        "id": "ibdzydj8",
+        "id": "0o56ofy6",
         "name": "Background media",
         "type": "background",
         "visible": true,
@@ -71,7 +71,7 @@
         "overlayOpacity": 0.7
       },
       {
-        "id": "jl16zg2l",
+        "id": "exn7b10l",
         "name": "Top Gold Bar",
         "type": "accentBar",
         "visible": true,
@@ -96,7 +96,7 @@
         "height": 12
       },
       {
-        "id": "97khw86m",
+        "id": "9sbzl958",
         "name": "Economy Logo",
         "type": "logo",
         "visible": true,
@@ -120,7 +120,7 @@
         "text": "كشيدة اقتصاد"
       },
       {
-        "id": "co58xlg5",
+        "id": "uw7bjf9r",
         "name": "Markets Badge",
         "type": "label",
         "visible": true,
@@ -146,7 +146,7 @@
         "backgroundColor": "#FFB703"
       },
       {
-        "id": "8wgyvedq",
+        "id": "it2w70v8",
         "name": "Frosted Market Card",
         "type": "card",
         "visible": true,
@@ -174,7 +174,7 @@
         "height": 500
       },
       {
-        "id": "vxcyr58n",
+        "id": "txpiooqi",
         "name": "Ticker Header",
         "type": "subheadline",
         "visible": true,
@@ -198,7 +198,7 @@
         "text": "📊 مؤشرات أسواق المال"
       },
       {
-        "id": "lcl8mf81",
+        "id": "c65t9wsg",
         "name": "Market Headline",
         "type": "headline",
         "visible": true,
@@ -222,7 +222,7 @@
         "text": "ارتفاع مؤشرات الأسهم وتداولات قياسية في جلسة اليوم"
       },
       {
-        "id": "1v5ohgaa",
+        "id": "itzamjiy",
         "name": "Market Subheadline",
         "type": "subheadline",
         "visible": true,
@@ -246,7 +246,7 @@
         "text": "نمو ملحوظ في قطاعات التكنولوجيا والطاقة البديلة"
       },
       {
-        "id": "dvbbhbtr",
+        "id": "evc5oan5",
         "name": "Market Watch Footer",
         "type": "footer",
         "visible": true,
@@ -272,7 +272,7 @@
     ],
     "rounds": [
       {
-        "id": "dx5vr0io",
+        "id": "db3t0lol",
         "name": "First Round",
         "headline": "ارتفاع مؤشرات الأسهم وتداولات قياسية في جلسة اليوم",
         "subheadline": "نمو ملحوظ في قطاعات التكنولوجيا والطاقة البديلة",

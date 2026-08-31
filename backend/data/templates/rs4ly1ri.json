@@ -5,7 +5,7 @@
     "description": "",
     "version": 9,
     "created_at": 1788001925.9365897,
-    "updated_at": 1788118823.5463724,
+    "updated_at": 1788167580.7669823,
     "tags": []
   },
   "data": {
@@ -214,6 +214,44 @@
         "persistentStyle": true,
         "animateFirstRoundOnly": true,
         "text": "kashida.io"
+      },
+      {
+        "id": "fu1d2d1h",
+        "name": "Shape Object",
+        "type": "shape",
+        "visible": true,
+        "locked": false,
+        "x": 7.325401891071898,
+        "y": 30.430299946589088,
+        "width": 80,
+        "textAlign": "center",
+        "fontSize": 72,
+        "fontWeight": 700,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "zoom-in",
+          "duration": 0.6,
+          "delay": 0.2,
+          "easing": "back-out"
+        },
+        "persistentStyle": true,
+        "animateFirstRoundOnly": false,
+        "shapeType": "rounded-box",
+        "height": 180,
+        "backgroundColor": "rgba(30,86,160,0.85)",
+        "borderRadius": 24,
+        "fillType": "solid",
+        "gradientAngle": 135,
+        "gradientColorStart": "#1E56A0",
+        "gradientColorEnd": "#E63946",
+        "rotation": -99,
+        "skewX": 0,
+        "skewY": 0,
+        "shadowBlur": 29,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowOffsetY": 10,
+        "glowSpread": 24
       }
     ],
     "rounds": [

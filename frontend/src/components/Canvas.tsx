@@ -15,7 +15,21 @@ import {
   type PointerEvent as ReactPointerEvent,
   type MouseEvent as ReactMouseEvent,
 } from 'react'
-import { ZoomIn, ZoomOut, Maximize2, Grid3x3, RotateCcw, Sparkles } from 'lucide-react'
+import {
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Grid3x3,
+  RotateCcw,
+  Sparkles,
+  RotateCw,
+  Copy,
+  Trash2,
+  Lock,
+  LockOpen,
+  AlignHorizontalJustifyCenter,
+  AlignVerticalJustifyCenter,
+} from 'lucide-react'
 import type { Layer, TemplateModel, TextAlign } from '../lib/model'
 import { CSS_EASING, waaiKeyframes } from '../lib/animations'
 import { playheadToAnimTime } from '../lib/preview'
@@ -34,14 +48,40 @@ interface LayerViewProps {
   onSelect: (id: string) => void
   onMove: (id: string, x: number, y: number) => void
   onResize?: (id: string, width: number) => void
+  onRotate?: (id: string, rotation: number) => void
+  onDuplicate?: (id: string) => void
+  onDelete?: (id: string) => void
+  onToggleLock?: (id: string) => void
+  onAlignH?: (id: string) => void
+  onAlignV?: (id: string) => void
   registry: Registry
   playheadRef: MutableRefObject<number>
+  onDragStateChange?: (dragging: boolean, layerX?: number, layerY?: number, layerW?: number) => void
 }
 
-const LayerView = memo(function LayerView({ layer, index, selected, accent, onSelect, onMove, onResize, registry, playheadRef }: LayerViewProps) {
+const LayerView = memo(function LayerView({
+  layer,
+  index,
+  selected,
+  accent,
+  onSelect,
+  onMove,
+  onResize,
+  onRotate,
+  onDuplicate,
+  onDelete,
+  onToggleLock,
+  onAlignH,
+  onAlignV,
+  registry,
+  playheadRef,
+  onDragStateChange,
+}: LayerViewProps) {
   const ref = useRef<HTMLDivElement>(null)
   const animRef = useRef<Animation | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [isRotating, setIsRotating] = useState(false)
+  const [currentRotation, setCurrentRotation] = useState<number | null>(null)
   const dragState = useRef<{ px: number; py: number; ox: number; oy: number; moved: boolean } | null>(null)
 
   // Create/register the entrance animation.
@@ -107,6 +147,7 @@ const LayerView = memo(function LayerView({ layer, index, selected, accent, onSe
       const rect = ref.current?.parentElement?.getBoundingClientRect()
       if (!rect) return
       setIsDragging(true)
+      onDragStateChange?.(true, layer.x, layer.y, layer.width)
       dragState.current = { px: e.clientX, py: e.clientY, ox: layer.x, oy: layer.y, moved: false }
       const move = (ev: PointerEvent) => {
         const st = dragState.current
@@ -114,21 +155,35 @@ const LayerView = memo(function LayerView({ layer, index, selected, accent, onSe
         const dx = ((ev.clientX - st.px) / rect.width) * 100
         const dy = ((ev.clientY - st.py) / rect.height) * 100
         if (Math.abs(ev.clientX - st.px) + Math.abs(ev.clientY - st.py) > 2) st.moved = true
-        onMove(layer.id, clamp(st.ox + dx, 0, 100), clamp(st.oy + dy, 0, 100))
+        let targetX = clamp(st.ox + dx, 0, 100)
+        let targetY = clamp(st.oy + dy, 0, 100)
+        
+        // Smart magnetic center snapping (Canva style)
+        const centerX = targetX + (layer.width ? layer.width / 2 : 0)
+        if (Math.abs(centerX - 50) < 1.5) {
+          targetX = 50 - (layer.width ? layer.width / 2 : 0)
+        }
+        if (Math.abs(targetY - 50) < 1.5) {
+          targetY = 50
+        }
+
+        onMove(layer.id, targetX, targetY)
+        onDragStateChange?.(true, targetX, targetY, layer.width)
       }
       const up = () => {
         setIsDragging(false)
+        onDragStateChange?.(false)
         window.removeEventListener('pointermove', move)
         window.removeEventListener('pointerup', up)
       }
       window.addEventListener('pointermove', move)
       window.addEventListener('pointerup', up)
     },
-    [layer.id, layer.locked, layer.type, layer.x, layer.y, onMove],
+    [layer.id, layer.locked, layer.type, layer.x, layer.y, layer.width, onMove, onDragStateChange],
   )
 
-  const startResize = useCallback(
-    (e: ReactPointerEvent) => {
+  const startCornerResize = useCallback(
+    (e: ReactPointerEvent, corner: 'se' | 'sw' | 'ne' | 'nw') => {
       if (layer.locked || layer.type === 'background' || !onResize) return
       e.stopPropagation()
       e.preventDefault()
@@ -137,7 +192,8 @@ const LayerView = memo(function LayerView({ layer, index, selected, accent, onSe
       const startX = e.clientX
       const startWidth = layer.width ?? 80
       const move = (ev: PointerEvent) => {
-        const dx = ((ev.clientX - startX) / rect.width) * 100
+        const sign = corner === 'se' || corner === 'ne' ? 1 : -1
+        const dx = ((ev.clientX - startX) / rect.width) * 100 * sign
         onResize(layer.id, clamp(Math.round(startWidth + dx), 10, 100))
       }
       const up = () => {
@@ -148,6 +204,49 @@ const LayerView = memo(function LayerView({ layer, index, selected, accent, onSe
       window.addEventListener('pointerup', up)
     },
     [layer.id, layer.locked, layer.type, layer.width, onResize],
+  )
+
+  const startRotate = useCallback(
+    (e: ReactPointerEvent) => {
+      if (layer.locked || layer.type === 'background' || !onRotate) return
+      e.stopPropagation()
+      e.preventDefault()
+      const rect = ref.current?.getBoundingClientRect()
+      if (!rect) return
+      setIsRotating(true)
+      const cx = rect.left + rect.width / 2
+      const cy = rect.top + rect.height / 2
+      const initialAngle = layer.rotation || 0
+      const startPointerAngle = Math.atan2(e.clientY - cy, e.clientX - cx) * (180 / Math.PI)
+
+      const move = (ev: PointerEvent) => {
+        const currentPointerAngle = Math.atan2(ev.clientY - cy, ev.clientX - cx) * (180 / Math.PI)
+        const diff = currentPointerAngle - startPointerAngle
+        let newAngle = Math.round((initialAngle + diff) % 360)
+        if (newAngle > 180) newAngle -= 360
+        if (newAngle < -180) newAngle += 360
+        // Snapping within 3 degrees
+        if (Math.abs(newAngle) <= 3) newAngle = 0
+        else if (Math.abs(newAngle - 45) <= 3) newAngle = 45
+        else if (Math.abs(newAngle + 45) <= 3) newAngle = -45
+        else if (Math.abs(newAngle - 90) <= 3) newAngle = 90
+        else if (Math.abs(newAngle + 90) <= 3) newAngle = -90
+        else if (Math.abs(Math.abs(newAngle) - 180) <= 3) newAngle = 180
+        setCurrentRotation(newAngle)
+        onRotate(layer.id, newAngle)
+      }
+
+      const up = () => {
+        setIsRotating(false)
+        setCurrentRotation(null)
+        window.removeEventListener('pointermove', move)
+        window.removeEventListener('pointerup', up)
+      }
+
+      window.addEventListener('pointermove', move)
+      window.addEventListener('pointerup', up)
+    },
+    [layer.id, layer.locked, layer.type, layer.rotation, onRotate],
   )
 
   const handleClick = useCallback(
@@ -378,18 +477,114 @@ const LayerView = memo(function LayerView({ layer, index, selected, accent, onSe
         </div>
       )}
 
-      {/* Figma-style Selection Bounding Box & Handles */}
+      {/* Canva-Grade Selection Bounding Box & Handles */}
       {selected && layer.type !== 'background' && (
-        <div className="pointer-events-none absolute -inset-1 rounded-xs border-2 border-[#1E56A0] shadow-[0_0_0_1px_rgba(255,255,255,0.9)]">
-          {/* Corner Handles */}
-          <div className="absolute -left-1.5 -top-1.5 h-3 w-3 rounded-xs border-2 border-[#1E56A0] bg-white shadow-xs" />
-          <div className="absolute -right-1.5 -top-1.5 h-3 w-3 rounded-xs border-2 border-[#1E56A0] bg-white shadow-xs" />
-          <div className="absolute -left-1.5 -bottom-1.5 h-3 w-3 rounded-xs border-2 border-[#1E56A0] bg-white shadow-xs" />
+        <div className="pointer-events-none absolute -inset-1 rounded-sm border-2 border-[#1E56A0] shadow-[0_0_0_1px_rgba(255,255,255,0.95)]">
+          {/* Floating Canva Quick Action Mini-Toolbar */}
+          <div className="pointer-events-auto absolute -top-12 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 rounded-2xl border border-slate-800/60 bg-[#0B1528]/95 px-2 py-1 shadow-2xl backdrop-blur-md">
+            {onDuplicate && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onDuplicate(layer.id) }}
+                title="Duplicate layer (Ctrl+D)"
+                className="flex h-7 w-7 items-center justify-center rounded-xl text-slate-300 hover:bg-white/15 hover:text-white transition-colors cursor-pointer"
+              >
+                <Copy size={13} />
+              </button>
+            )}
+            {onAlignH && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onAlignH(layer.id) }}
+                title="Center horizontally"
+                className="flex h-7 w-7 items-center justify-center rounded-xl text-slate-300 hover:bg-white/15 hover:text-white transition-colors cursor-pointer"
+              >
+                <AlignHorizontalJustifyCenter size={13} />
+              </button>
+            )}
+            {onAlignV && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onAlignV(layer.id) }}
+                title="Center vertically"
+                className="flex h-7 w-7 items-center justify-center rounded-xl text-slate-300 hover:bg-white/15 hover:text-white transition-colors cursor-pointer"
+              >
+                <AlignVerticalJustifyCenter size={13} />
+              </button>
+            )}
+            {onToggleLock && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onToggleLock(layer.id) }}
+                title={layer.locked ? 'Unlock layer' : 'Lock layer'}
+                className="flex h-7 w-7 items-center justify-center rounded-xl text-slate-300 hover:bg-white/15 hover:text-white transition-colors cursor-pointer"
+              >
+                {layer.locked ? <Lock size={13} className="text-amber-400" /> : <LockOpen size={13} />}
+              </button>
+            )}
+            {onDelete && !layer.locked && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onDelete(layer.id) }}
+                title="Delete layer (Del)"
+                className="flex h-7 w-7 items-center justify-center rounded-xl text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors cursor-pointer"
+              >
+                <Trash2 size={13} />
+              </button>
+            )}
+          </div>
+
+          {/* 4 Corner Resize Handles (Canva Pill-Dots) */}
           <div
-            className="pointer-events-auto absolute -right-2 -bottom-2 h-4 w-4 cursor-se-resize rounded-xs border-2 border-[#1E56A0] bg-white shadow-xs hover:scale-125 transition-transform"
-            onPointerDown={startResize}
-            title="Drag to resize width"
+            className="pointer-events-auto absolute -left-2 -top-2 h-4 w-4 cursor-nwse-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-md hover:scale-125 transition-transform"
+            onPointerDown={(e) => startCornerResize(e, 'nw')}
+            title="Drag to resize"
           />
+          <div
+            className="pointer-events-auto absolute -right-2 -top-2 h-4 w-4 cursor-nesw-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-md hover:scale-125 transition-transform"
+            onPointerDown={(e) => startCornerResize(e, 'ne')}
+            title="Drag to resize"
+          />
+          <div
+            className="pointer-events-auto absolute -left-2 -bottom-2 h-4 w-4 cursor-nesw-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-md hover:scale-125 transition-transform"
+            onPointerDown={(e) => startCornerResize(e, 'sw')}
+            title="Drag to resize"
+          />
+          <div
+            className="pointer-events-auto absolute -right-2 -bottom-2 h-4 w-4 cursor-nwse-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-md hover:scale-125 transition-transform"
+            onPointerDown={(e) => startCornerResize(e, 'se')}
+            title="Drag to resize"
+          />
+
+          {/* Left & Right Edge Resize Bars */}
+          <div
+            className="pointer-events-auto absolute -left-1.5 top-1/2 -translate-y-1/2 h-6 w-2.5 cursor-ew-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-xs hover:scale-110 transition-transform"
+            onPointerDown={(e) => startCornerResize(e, 'sw')}
+            title="Resize width"
+          />
+          <div
+            className="pointer-events-auto absolute -right-1.5 top-1/2 -translate-y-1/2 h-6 w-2.5 cursor-ew-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-xs hover:scale-110 transition-transform"
+            onPointerDown={(e) => startCornerResize(e, 'se')}
+            title="Resize width"
+          />
+
+          {/* Canva Floating Rotation Stem & Knob */}
+          <div className="pointer-events-auto absolute -bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center">
+            <div className="h-4 w-0.5 border-l-2 border-dashed border-[#1E56A0]" />
+            <div
+              className="group relative flex h-6 w-6 cursor-grab active:cursor-grabbing items-center justify-center rounded-full border-2 border-[#1E56A0] bg-white shadow-lg hover:scale-125 hover:bg-blue-50 transition-transform"
+              onPointerDown={startRotate}
+              title="Drag to rotate 360°"
+            >
+              <RotateCw size={11} className="text-[#1E56A0]" />
+              {/* Angle Tooltip during rotation */}
+              {(isRotating || layer.rotation) && (
+                <div className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 z-50 rounded-md bg-[#0B1528] px-2 py-0.5 text-[10px] font-bold text-white shadow-md whitespace-nowrap">
+                  {currentRotation ?? layer.rotation ?? 0}°
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Layer Name Tag */}
           <div className="absolute -top-6.5 left-0 flex items-center gap-1 rounded-t-md bg-[#1E56A0] px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
@@ -507,14 +702,14 @@ function BumperCanvasView({
       </div>
 
       {/* Slogan */}
-      {bumper?.slogan && (
+      {bumper?.slogan ? (
         <div
           ref={sloganRef}
           className="mt-8 px-12 text-center text-[38px] font-bold text-white/90 drop-shadow-md font-sans tracking-wide"
         >
           {bumper.slogan}
         </div>
-      )}
+      ) : null}
 
       {/* Bottom Accent Bar */}
       <div
@@ -531,6 +726,12 @@ interface CanvasProps {
   onSelect: (id: string | null) => void
   onMoveLayer: (id: string, x: number, y: number) => void
   onResizeLayer?: (id: string, width: number) => void
+  onRotateLayer?: (id: string, rotation: number) => void
+  onDuplicateLayer?: (id: string) => void
+  onDeleteLayer?: (id: string) => void
+  onToggleLockLayer?: (id: string) => void
+  onAlignHLayer?: (id: string) => void
+  onAlignVLayer?: (id: string) => void
   playheadRef: MutableRefObject<number>
   playing: boolean
   roundOffsets?: { id: string; start: number; duration: number }[]
@@ -555,14 +756,42 @@ function ControlBtn({ onClick, active, label, children }: { onClick: () => void;
   )
 }
 
-export function Canvas({ model, selectedId, onSelect, onMoveLayer, onResizeLayer, playheadRef, playing, roundOffsets, showBumper }: CanvasProps) {
+export function Canvas({
+  model,
+  selectedId,
+  onSelect,
+  onMoveLayer,
+  onResizeLayer,
+  onRotateLayer,
+  onDuplicateLayer,
+  onDeleteLayer,
+  onToggleLockLayer,
+  onAlignHLayer,
+  onAlignVLayer,
+  playheadRef,
+  playing,
+  roundOffsets,
+  showBumper,
+}: CanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const registry = useRef<Registry>(new Map()).current
   const bgVideoRef = useRef<HTMLVideoElement>(null)
   const [fitScale, setFitScale] = useState(0.3)
   const [zoom, setZoom] = useState<Zoom>('fit')
   const [guides, setGuides] = useState(false)
+  const [activeGuide, setActiveGuide] = useState<{ v?: boolean; h?: boolean } | null>(null)
   const isVertical = model.width === 1080 && model.height === 1920
+
+  const handleDragStateChange = useCallback((dragging: boolean, lx?: number, ly?: number, lw?: number) => {
+    if (!dragging || lx === undefined || ly === undefined) {
+      setActiveGuide(null)
+      return
+    }
+    const cx = lx + (lw ? lw / 2 : 0)
+    const nearV = Math.abs(cx - 50) < 1.8
+    const nearH = Math.abs(ly - 50) < 1.8
+    setActiveGuide(nearV || nearH ? { v: nearV, h: nearH } : null)
+  }, [])
 
   // Compute the "fit to screen" scale (maximize available workspace).
   useLayoutEffect(() => {
@@ -585,22 +814,18 @@ export function Canvas({ model, selectedId, onSelect, onMoveLayer, onResizeLayer
     return () => ro.disconnect()
   }, [model.width, model.height, isVertical])
 
-  // Scrub all layer animations and background video from the playhead ref each frame.
+  // Drive continuous animation updates to registered layer animations using requestAnimationFrame.
   useEffect(() => {
     let raf = 0
     const loop = () => {
-      const t = playheadRef.current
-      let timeInRound = t
-      let isNextRound = false
-      if (roundOffsets && roundOffsets.length > 0) {
-        const matchIdx = roundOffsets.findIndex((o) => t >= o.start && t < o.start + o.duration)
-        const safeIdx = matchIdx >= 0 ? matchIdx : roundOffsets.length - 1
-        const match = roundOffsets[safeIdx]
-        if (match) timeInRound = Math.max(0, t - match.start)
-        isNextRound = safeIdx > 0
-      }
-      const isParkedAtZero = t === 0 && !playing
-      registry.forEach((fn) => fn(isParkedAtZero ? 999 : timeInRound, isNextRound))
+      const globalTime = playheadRef.current
+      const seg = roundOffsets?.find((r) => globalTime >= r.start && globalTime < r.start + r.duration)
+      const timeInRound = seg ? globalTime - seg.start : globalTime
+      const isNextRound = seg ? roundOffsets && roundOffsets.indexOf(seg) > 0 : false
+
+      registry.forEach((apply) => {
+        apply(playing ? timeInRound : (globalTime === 0 ? 999 : timeInRound), isNextRound)
+      })
 
       // Sync background video element to current playhead
       if (bgVideoRef.current && bgVideoRef.current.readyState >= 1) {
@@ -687,7 +912,15 @@ export function Canvas({ model, selectedId, onSelect, onMoveLayer, onResizeLayer
               </div>
 
               {/* Exact 1080x1920 Physical Screen */}
-              <div className="overflow-hidden rounded-[44px] bg-black" style={{ width: model.width, height: model.height }}>
+              <div className="overflow-hidden rounded-[44px] bg-black relative" style={{ width: model.width, height: model.height }}>
+                {/* Magnetic Smart Laser Guide Lines */}
+                {activeGuide?.v && (
+                  <div className="pointer-events-none absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-[#E11D48] shadow-[0_0_8px_#E11D48] z-50 animate-pulse" />
+                )}
+                {activeGuide?.h && (
+                  <div className="pointer-events-none absolute top-1/2 left-0 w-full h-[2px] -translate-y-1/2 bg-[#E11D48] shadow-[0_0_8px_#E11D48] z-50 animate-pulse" />
+                )}
+
                 {showBumper ? (
                   <BumperCanvasView model={model} />
                 ) : (
@@ -725,8 +958,15 @@ export function Canvas({ model, selectedId, onSelect, onMoveLayer, onResizeLayer
                           onSelect={onSelect}
                           onMove={onMoveLayer}
                           onResize={onResizeLayer}
+                          onRotate={onRotateLayer}
+                          onDuplicate={onDuplicateLayer}
+                          onDelete={onDeleteLayer}
+                          onToggleLock={onToggleLockLayer}
+                          onAlignH={onAlignHLayer}
+                          onAlignV={onAlignVLayer}
                           registry={registry}
                           playheadRef={playheadRef}
+                          onDragStateChange={handleDragStateChange}
                         />
                       ))}
                     {guides && (
@@ -748,11 +988,19 @@ export function Canvas({ model, selectedId, onSelect, onMoveLayer, onResizeLayer
           <div className="m-auto" style={{ width: model.width * scale, height: model.height * scale }}>
             {/* Standard Artboard Screen for 1:1, 16:9, etc. */}
             <div
-              className="absolute origin-top-left overflow-hidden rounded-[24px] shadow-[0_20px_50px_rgba(15,23,42,0.25)] ring-1 ring-slate-900/10"
+              className="absolute origin-top-left overflow-hidden rounded-[24px] shadow-[0_20px_50px_rgba(15,23,42,0.25)] ring-1 ring-slate-900/10 relative"
               style={{ width: model.width, height: model.height, transform: `scale(${scale})`, background: model.backgroundColor }}
               dir="rtl"
               onClick={() => onSelect(null)}
             >
+              {/* Magnetic Smart Laser Guide Lines */}
+              {activeGuide?.v && (
+                <div className="pointer-events-none absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-[#E11D48] shadow-[0_0_8px_#E11D48] z-50 animate-pulse" />
+              )}
+              {activeGuide?.h && (
+                <div className="pointer-events-none absolute top-1/2 left-0 w-full h-[2px] -translate-y-1/2 bg-[#E11D48] shadow-[0_0_8px_#E11D48] z-50 animate-pulse" />
+              )}
+
               {media?.url ? (
                 media.type === 'video' ? (
                   <video ref={bgVideoRef} className="absolute inset-0 h-full w-full" style={{ objectFit: media.fit, transform: `scale(${media.scale})`, objectPosition: `${media.posX}% ${media.posY}%` }} src={media.url} muted playsInline />
@@ -781,8 +1029,15 @@ export function Canvas({ model, selectedId, onSelect, onMoveLayer, onResizeLayer
                     onSelect={onSelect}
                     onMove={onMoveLayer}
                     onResize={onResizeLayer}
+                    onRotate={onRotateLayer}
+                    onDuplicate={onDuplicateLayer}
+                    onDelete={onDeleteLayer}
+                    onToggleLock={onToggleLockLayer}
+                    onAlignH={onAlignHLayer}
+                    onAlignV={onAlignVLayer}
                     playheadRef={playheadRef}
                     registry={registry}
+                    onDragStateChange={handleDragStateChange}
                   />
                 ))}
             </div>
@@ -792,5 +1047,3 @@ export function Canvas({ model, selectedId, onSelect, onMoveLayer, onResizeLayer
     </div>
   )
 }
-
-// Re-export type alias so callers can type refs consistently.
