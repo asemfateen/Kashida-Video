@@ -7,8 +7,11 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // Optional: proxy API calls to the backend during dev
       '/api': {
+        target: 'http://localhost:8001',
+        changeOrigin: true,
+      },
+      '/health': {
         target: 'http://localhost:8001',
         changeOrigin: true,
       },

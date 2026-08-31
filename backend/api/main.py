@@ -37,6 +37,7 @@ app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
 
 
 @app.get("/health")
+@app.get("/api/health")
 def health():
     return {"status": "ok"}
 

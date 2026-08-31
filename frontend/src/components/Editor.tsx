@@ -965,16 +965,26 @@ export function Editor({ initial, onBack, onSaved }: Props) {
 
           <span
             title={saveStatus.detail}
-            className={`flex items-center gap-1.5 rounded-xl border px-2.5 py-1.5 text-xs font-semibold ${
+            className={`flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold ${
               saveStatus.tone === 'danger'
-                ? 'border-red-200 bg-red-50 text-red-600'
+                ? 'border-rose-200 bg-rose-50 text-rose-700'
                 : saveStatus.tone === 'success'
                   ? 'border-emerald-200/80 bg-emerald-50 text-emerald-700'
                   : 'border-slate-200/80 bg-white text-slate-600'
             }`}
           >
             <saveStatus.icon size={13} className={saveStatus.spin ? 'animate-spin' : 'shrink-0'} aria-hidden />
-            <span className="max-w-[120px] truncate">{saveStatus.text}</span>
+            <span className="max-w-[140px] truncate">{saveStatus.text}</span>
+            {!online && (
+              <button
+                type="button"
+                onClick={() => checkBackend()}
+                className="ml-1 rounded-md bg-rose-200/60 px-1.5 py-0.5 text-[10px] font-bold text-rose-800 hover:bg-rose-200 transition-colors cursor-pointer"
+                title="Retry connecting to backend"
+              >
+                Retry
+              </button>
+            )}
           </span>
 
           <button
