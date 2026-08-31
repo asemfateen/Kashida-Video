@@ -435,7 +435,7 @@ const LayerView = memo(function LayerView({
     textAlign: cssAlign(layer.textAlign),
     fontSize: layer.fontSize,
     fontWeight: layer.fontWeight,
-    fontFamily: layer.fontFamily || undefined,
+    fontFamily: layer.fontFamily || "'Thmanyah Sans', 'Plus Jakarta Sans', system-ui, sans-serif",
     textShadow: shadowStyle,
     WebkitTextStroke: layer.textStroke || undefined,
     backgroundImage: layer.gradient || undefined,
