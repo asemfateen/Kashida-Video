@@ -111,6 +111,12 @@ export function gsapOut(type: BumperOutType): FromState {
       return { opacity: 0, x: 120 }
     case 'zoom-out':
       return { opacity: 0, scale: 0.8 }
+    case 'pop-out':
+      return { opacity: 0, scale: 0.3 }
+    case 'blur-out':
+      return { opacity: 0, filter: 'blur(12px)', scale: 0.92 }
+    case 'flip-down':
+      return { opacity: 0, y: 35, rotationX: -55 }
     case 'none':
       return {}
   }
@@ -131,6 +137,12 @@ export function waaiOutKeyframes(type: BumperOutType): Keyframe[] {
       return [{ opacity: 1, transform: 'translateX(0px)' }, { opacity: 0, transform: 'translateX(120px)' }]
     case 'zoom-out':
       return [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(0.8)' }]
+    case 'pop-out':
+      return [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(0.3)' }]
+    case 'blur-out':
+      return [{ opacity: 1, filter: 'blur(0px)', transform: 'scale(1)' }, { opacity: 0, filter: 'blur(12px)', transform: 'scale(0.92)' }]
+    case 'flip-down':
+      return [{ opacity: 1, transform: 'perspective(600px) rotateX(0deg) translateY(0px)' }, { opacity: 0, transform: 'perspective(600px) rotateX(-55deg) translateY(35px)' }]
     case 'none':
       return []
   }

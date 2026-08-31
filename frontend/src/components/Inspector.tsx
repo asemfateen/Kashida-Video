@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { UploadCloud, RefreshCw, RotateCcw, AlignHorizontalJustifyCenter, AlignVerticalJustifyCenter, Copy, ChevronLeft, ChevronRight, Trash2, Play, Sparkles } from 'lucide-react'
-import type { EntranceAnimation, BumperExitAnimation, Layer, TemplateModel, TemplateRound, BackgroundMedia, BumperConfig } from '../lib/model'
+import type { EntranceAnimation, ExitAnimationType, EasingName, BumperExitAnimation, Layer, TemplateModel, TemplateRound, BackgroundMedia, BumperConfig } from '../lib/model'
 import { LAYER_TYPE_LABELS, ANIMATION_LABELS, EASING_LABELS, defaultBumper, ASPECT_RATIOS } from '../lib/model'
 import { CSS_EASING, waaiKeyframes, waaiOutKeyframes } from '../lib/animations'
 import { ARABIC_FONTS } from '../lib/fonts'
@@ -991,6 +991,84 @@ export function Inspector({
               )}
             </>
           )}
+
+          {/* Exit Transition / Animation Out */}
+          <div className="pt-3 mt-3 border-t border-slate-200/70 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] font-bold text-slate-700">Exit Transition (Out)</span>
+              <span className="text-[10px] text-slate-400 font-semibold">Plays near end of scene</span>
+            </div>
+            <Field label="Exit Type">
+              <Select
+                value={layer.animationOut?.type ?? 'none'}
+                onChange={(v) =>
+                  updateLayer(layer.id, {
+                    animationOut: {
+                      type: v as ExitAnimationType,
+                      duration: layer.animationOut?.duration ?? 0.5,
+                      delay: layer.animationOut?.delay ?? 0.4,
+                      easing: layer.animationOut?.easing ?? 'ease-out',
+                    },
+                  })
+                }
+                options={[
+                  { value: 'none', label: 'None (Stay until cut)' },
+                  { value: 'fade-out', label: 'Fade Out' },
+                  { value: 'slide-down', label: 'Slide Down Out' },
+                  { value: 'slide-up', label: 'Slide Up Out' },
+                  { value: 'slide-left', label: 'Slide Left Out' },
+                  { value: 'slide-right', label: 'Slide Right Out' },
+                  { value: 'zoom-out', label: 'Zoom Out' },
+                  { value: 'pop-out', label: 'Pop Scale Out' },
+                  { value: 'blur-out', label: 'Blur Dissolve Out' },
+                  { value: 'flip-down', label: '3D Flip Down Out' },
+                ]}
+              />
+            </Field>
+            {layer.animationOut && layer.animationOut.type !== 'none' && (
+              <>
+                <Field label="Exit Duration">
+                  <Slider
+                    value={layer.animationOut.duration}
+                    onChange={(v) =>
+                      updateLayer(layer.id, {
+                        animationOut: { ...layer.animationOut!, duration: v },
+                      })
+                    }
+                    min={0.2}
+                    max={2}
+                    step={0.1}
+                    unit="s"
+                  />
+                </Field>
+                <Field label="Exit Timing (offset from end)">
+                  <Slider
+                    value={layer.animationOut.delay}
+                    onChange={(v) =>
+                      updateLayer(layer.id, {
+                        animationOut: { ...layer.animationOut!, delay: v },
+                      })
+                    }
+                    min={0}
+                    max={3}
+                    step={0.1}
+                    unit="s"
+                  />
+                </Field>
+                <Field label="Exit Easing">
+                  <Select
+                    value={layer.animationOut.easing}
+                    onChange={(v) =>
+                      updateLayer(layer.id, {
+                        animationOut: { ...layer.animationOut!, easing: v as EasingName },
+                      })
+                    }
+                    options={Object.entries(EASING_LABELS).map(([value, label]) => ({ value, label }))}
+                  />
+                </Field>
+              </>
+            )}
+          </div>
         </div>
       </Section>
     </div>

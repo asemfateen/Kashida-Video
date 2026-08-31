@@ -44,15 +44,6 @@ export type AnimationType =
   | 'flip-up'
   | 'blur-reveal'
 
-export type BumperOutType =
-  | 'none'
-  | 'fade-out'
-  | 'slide-up'
-  | 'slide-down'
-  | 'slide-left'
-  | 'slide-right'
-  | 'zoom-out'
-
 export type ExitAnimationType =
   | 'none'
   | 'fade-out'
@@ -61,6 +52,11 @@ export type ExitAnimationType =
   | 'slide-left'
   | 'slide-right'
   | 'zoom-out'
+  | 'pop-out'
+  | 'blur-out'
+  | 'flip-down'
+
+export type BumperOutType = ExitAnimationType
 
 export type EasingName =
   | 'ease-out'
