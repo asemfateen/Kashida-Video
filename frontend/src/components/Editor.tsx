@@ -397,9 +397,12 @@ export function Editor({ initial, onBack, onSaved }: Props) {
     updateLayer(id, { x, y })
   }, [updateLayer])
 
-  const resizeLayer = useCallback((id: string, width: number) => {
-    updateLayer(id, { width })
-  }, [updateLayer])
+  const resizeLayer = useCallback(
+    (id: string, width: number, height?: number) => {
+      updateLayer(id, height !== undefined ? { width, height } : { width })
+    },
+    [updateLayer]
+  )
 
   const bringForward = useCallback((id: string) => {
     updateModel((m) => {

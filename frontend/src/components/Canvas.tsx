@@ -70,7 +70,7 @@ interface LayerViewProps {
   accent: string
   onSelect: (id: string) => void
   onMove: (id: string, x: number, y: number) => void
-  onResize?: (id: string, width: number) => void
+  onResize?: (id: string, width: number, height?: number) => void
   onRotate?: (id: string, rotation: number) => void
   onDuplicate?: (id: string) => void
   onDelete?: (id: string) => void
@@ -240,20 +240,57 @@ const LayerView = memo(function LayerView({
     [layer.id, layer.locked, layer.type, layer.x, layer.y, layer.width, onMove, onDragStateChange],
   )
 
-  const startCornerResize = useCallback(
-    (e: ReactPointerEvent, corner: 'se' | 'sw' | 'ne' | 'nw') => {
+  const startResize = useCallback(
+    (e: ReactPointerEvent, handle: 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw') => {
       if (layer.locked || layer.type === 'background' || !onResize) return
       e.stopPropagation()
       e.preventDefault()
       const rect = ref.current?.parentElement?.getBoundingClientRect()
       if (!rect) return
       const startX = e.clientX
-      const startWidth = layer.width ?? 80
+      const startY = e.clientY
+      const startLayerX = layer.x
+      const startLayerY = layer.y
+      const startWidth = layer.width && layer.width > 0 ? layer.width : Math.max(10, ((ref.current?.offsetWidth || 200) / rect.width) * 100)
+      const startHeight = layer.height || (ref.current?.offsetHeight || 180)
+
       const move = (ev: PointerEvent) => {
-        const sign = corner === 'se' || corner === 'ne' ? 1 : -1
-        const dx = ((ev.clientX - startX) / rect.width) * 100 * sign
-        onResize(layer.id, clamp(Math.round(startWidth + dx), 10, 100))
+        const dxPct = ((ev.clientX - startX) / rect.width) * 100
+        const dyPx = (ev.clientY - startY) * (1920 / rect.height)
+        const dyPct = ((ev.clientY - startY) / rect.height) * 100
+
+        let newWidth = startWidth
+        let newHeight = startHeight
+        let newX = startLayerX
+        let newY = startLayerY
+
+        if (handle.includes('e')) {
+          newWidth = clamp(Math.round(startWidth + dxPct), 5, 100)
+        }
+        if (handle.includes('w')) {
+          const delta = startWidth - dxPct
+          if (delta >= 5 && delta <= 100) {
+            newWidth = Math.round(delta)
+            newX = clamp(startLayerX + dxPct, 0, 100)
+          }
+        }
+        if (handle.includes('s')) {
+          newHeight = Math.max(20, Math.round(startHeight + dyPx))
+        }
+        if (handle.includes('n')) {
+          const delta = startHeight - dyPx
+          if (delta >= 20) {
+            newHeight = Math.round(delta)
+            newY = clamp(startLayerY + dyPct, 0, 100)
+          }
+        }
+
+        if (newX !== startLayerX || newY !== startLayerY) {
+          onMove(layer.id, newX, newY)
+        }
+        onResize(layer.id, newWidth, newHeight)
       }
+
       const up = () => {
         window.removeEventListener('pointermove', move)
         window.removeEventListener('pointerup', up)
@@ -261,7 +298,7 @@ const LayerView = memo(function LayerView({
       window.addEventListener('pointermove', move)
       window.addEventListener('pointerup', up)
     },
-    [layer.id, layer.locked, layer.type, layer.width, onResize],
+    [layer.id, layer.locked, layer.type, layer.x, layer.y, layer.width, layer.height, onMove, onResize],
   )
 
   const startRotate = useCallback(
@@ -689,35 +726,45 @@ const LayerView = memo(function LayerView({
 
           {/* 4 Corner Resize Handles (Canva Pill-Dots) */}
           <div
-            className="pointer-events-auto absolute -left-2 -top-2 h-4 w-4 cursor-nwse-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-md hover:scale-125 transition-transform"
-            onPointerDown={(e) => startCornerResize(e, 'nw')}
-            title="Drag to resize"
+            className="pointer-events-auto absolute -left-2 -top-2 h-4 w-4 cursor-nwse-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-md hover:scale-125 transition-transform z-30"
+            onPointerDown={(e) => startResize(e, 'nw')}
+            title="Drag corner to resize"
           />
           <div
-            className="pointer-events-auto absolute -right-2 -top-2 h-4 w-4 cursor-nesw-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-md hover:scale-125 transition-transform"
-            onPointerDown={(e) => startCornerResize(e, 'ne')}
-            title="Drag to resize"
+            className="pointer-events-auto absolute -right-2 -top-2 h-4 w-4 cursor-nesw-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-md hover:scale-125 transition-transform z-30"
+            onPointerDown={(e) => startResize(e, 'ne')}
+            title="Drag corner to resize"
           />
           <div
-            className="pointer-events-auto absolute -left-2 -bottom-2 h-4 w-4 cursor-nesw-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-md hover:scale-125 transition-transform"
-            onPointerDown={(e) => startCornerResize(e, 'sw')}
-            title="Drag to resize"
+            className="pointer-events-auto absolute -left-2 -bottom-2 h-4 w-4 cursor-nesw-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-md hover:scale-125 transition-transform z-30"
+            onPointerDown={(e) => startResize(e, 'sw')}
+            title="Drag corner to resize"
           />
           <div
-            className="pointer-events-auto absolute -right-2 -bottom-2 h-4 w-4 cursor-nwse-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-md hover:scale-125 transition-transform"
-            onPointerDown={(e) => startCornerResize(e, 'se')}
-            title="Drag to resize"
+            className="pointer-events-auto absolute -right-2 -bottom-2 h-4 w-4 cursor-nwse-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-md hover:scale-125 transition-transform z-30"
+            onPointerDown={(e) => startResize(e, 'se')}
+            title="Drag corner to resize"
           />
 
-          {/* Left & Right Edge Resize Bars */}
+          {/* 4 Edge Resize Bars (Canva Sliders) */}
           <div
-            className="pointer-events-auto absolute -left-1.5 top-1/2 -translate-y-1/2 h-6 w-2.5 cursor-ew-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-xs hover:scale-110 transition-transform"
-            onPointerDown={(e) => startCornerResize(e, 'sw')}
+            className="pointer-events-auto absolute left-1/2 -top-1.5 -translate-x-1/2 h-2.5 w-7 cursor-ns-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-xs hover:scale-110 transition-transform z-30"
+            onPointerDown={(e) => startResize(e, 'n')}
+            title="Resize height"
+          />
+          <div
+            className="pointer-events-auto absolute left-1/2 -bottom-1.5 -translate-x-1/2 h-2.5 w-7 cursor-ns-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-xs hover:scale-110 transition-transform z-30"
+            onPointerDown={(e) => startResize(e, 's')}
+            title="Resize height"
+          />
+          <div
+            className="pointer-events-auto absolute -left-1.5 top-1/2 -translate-y-1/2 h-7 w-2.5 cursor-ew-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-xs hover:scale-110 transition-transform z-30"
+            onPointerDown={(e) => startResize(e, 'w')}
             title="Resize width"
           />
           <div
-            className="pointer-events-auto absolute -right-1.5 top-1/2 -translate-y-1/2 h-6 w-2.5 cursor-ew-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-xs hover:scale-110 transition-transform"
-            onPointerDown={(e) => startCornerResize(e, 'se')}
+            className="pointer-events-auto absolute -right-1.5 top-1/2 -translate-y-1/2 h-7 w-2.5 cursor-ew-resize rounded-full border-2 border-[#1E56A0] bg-white shadow-xs hover:scale-110 transition-transform z-30"
+            onPointerDown={(e) => startResize(e, 'e')}
             title="Resize width"
           />
 
@@ -878,7 +925,7 @@ interface CanvasProps {
   selectedId: string | null
   onSelect: (id: string | null) => void
   onMoveLayer: (id: string, x: number, y: number) => void
-  onResizeLayer?: (id: string, width: number) => void
+  onResizeLayer?: (id: string, width: number, height?: number) => void
   onRotateLayer?: (id: string, rotation: number) => void
   onDuplicateLayer?: (id: string) => void
   onDeleteLayer?: (id: string) => void

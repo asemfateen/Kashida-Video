@@ -74,7 +74,9 @@ export function Slider({ label, value, onChange, min, max, step = 1, unit, disab
         onChange={(e) => onChange(parseFloat(e.target.value))}
         className="w-full"
       />
-      <span className="w-10 shrink-0 text-right text-[11px] tabular-nums font-semibold text-slate-600">{value}{unit}</span>
+      <span className="w-10 shrink-0 text-right text-[11px] tabular-nums font-semibold text-slate-600">
+        {typeof value === 'number' ? Math.round(value * 10) / 10 : value}{unit}
+      </span>
     </div>
   )
 }
