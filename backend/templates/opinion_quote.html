@@ -23,7 +23,7 @@ html, body { width:1080px; height:1920px; overflow:hidden; margin:0; padding:0; 
 #b0{position:absolute;left:0;right:0;top:40%;text-align:center;font-weight:700;font-size:120px;line-height:1.1;color:#fff;}
 #b0 img{max-width:64%;height:auto;object-fit:contain;}
 #b1{position:absolute;left:0;right:0;top:56%;text-align:center;font-weight:400;font-size:34px;color:rgba(255,255,255,.55);}
-#l0{left:8%;top:4%;width:auto;text-align:right;font-size:22px;font-weight:700;color:#ffffff;opacity:1;z-index:2;}
+#l0{left:8%;top:4%;width:auto;text-align:right;unicode-bidi:plaintext;font-size:22px;font-weight:700;color:#ffffff;opacity:1;z-index:2;}
 #l0 .lb{display:inline-flex;align-items:center;gap:14px;background:#e63946;padding:14px 30px;color:#fff;line-height:1;}
 #l0 .lb-ar{font-size:22px;font-weight:700;}
 #l0 .lb-en{font-size:14px;font-weight:700;opacity:.85;text-transform:uppercase;letter-spacing:3px;}
@@ -32,13 +32,13 @@ html, body { width:1080px; height:1920px; overflow:hidden; margin:0; padding:0; 
 #l0 .fifa-tab{background:#000000;border-radius:14px 0 0 0;position:relative;padding:8px 14px 4px 14px;display:flex;align-items:center;justify-content:center;}
 #l0 .fifa-tail{position:absolute;bottom:-16px;left:0;width:0;height:0;border-top:16px solid #000000;border-right:18px solid transparent;}
 #l0 .tournament-text{padding:0 34px 0 22px;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:900;color:#ffffff;direction:rtl;letter-spacing:2px;font-family:'Thmanyah Sans',system-ui,sans-serif;}
-#l1{left:75%;top:4%;width:auto;text-align:right;font-size:38px;font-weight:900;color:#ffffff;opacity:1;z-index:3;}
+#l1{left:75%;top:4%;width:auto;text-align:right;unicode-bidi:plaintext;font-size:38px;font-weight:900;color:#ffffff;opacity:1;z-index:3;}
 #l2{left:6%;top:42%;width:88%;text-align:center;color:#ffffff;opacity:1;z-index:4;}
 #l2{height:520px;background:rgba(15,23,42,0.88);border:2px solid rgba(255,255,255,0.18);border-radius:32px;backdrop-filter:blur(20px);box-shadow:0 25px 50px rgba(0,0,0,0.6);}
-#l3{left:10%;top:44%;width:80%;text-align:center;font-size:90px;font-weight:900;color:#e63946;opacity:1;z-index:5;}
-#l4{left:10%;top:52%;width:80%;text-align:center;font-size:42px;font-weight:800;color:#ffffff;opacity:1;z-index:6;}
-#l5{left:10%;top:72%;width:80%;text-align:center;font-size:26px;font-weight:700;color:#e63946;opacity:1;z-index:7;}
-#l6{left:0%;top:96%;width:100%;text-align:right;font-size:22px;font-weight:700;color:rgba(255,255,255,0.7);opacity:1;z-index:8;}
+#l3{left:10%;top:44%;width:80%;text-align:center;line-height:1.6;unicode-bidi:plaintext;font-size:90px;font-weight:900;color:#e63946;opacity:1;z-index:5;}
+#l4{left:10%;top:52%;width:80%;text-align:center;line-height:1.6;unicode-bidi:plaintext;font-size:42px;font-weight:800;color:#ffffff;opacity:1;z-index:6;}
+#l5{left:10%;top:72%;width:80%;text-align:center;line-height:1.6;unicode-bidi:plaintext;font-size:26px;font-weight:700;color:#e63946;opacity:1;z-index:7;}
+#l6{left:0%;top:96%;width:100%;text-align:right;unicode-bidi:plaintext;font-size:22px;font-weight:700;color:rgba(255,255,255,0.7);opacity:1;z-index:8;}
 </style>
 </head>
 <body>
@@ -47,13 +47,7 @@ html, body { width:1080px; height:1920px; overflow:hidden; margin:0; padding:0; 
      <img class="bg-media" id="bgImage" style="display:none" /></div>
   <div class="bg-overlay" id="bgOverlay"></div>
   <div class="news-scene" id="newsScene">
-<div class="el" id="l0" data-type="label"><span class="lb"><span class="lb-ar">اقتباس وتصريح</span><span class="lb-en">STATEMENT</span></span></div>
-<div class="el" id="l1" data-type="logo">كشيدة</div>
-<div class="el" id="l2" data-type="card"></div>
-<div class="el" id="l3" data-type="subheadline">“</div>
-<div class="el" id="l4" data-type="headline">نعمل بكل عزم وإصرار على تحقيق رؤية التحول والتطوير المستمر</div>
-<div class="el" id="l5" data-type="subheadline">— تصريح رسمي رفيع المستوى</div>
-<div class="el" id="l6" data-type="footer"></div>
+<div class="el" id="l0" data-type="label"><span class="lb"><span class="lb-ar">اقتباس وتصريح</span><span class="lb-en">STATEMENT</span></span></div>,<div class="el" id="l1" data-type="logo">كشيدة</div>,<div class="el" id="l2" data-type="card"></div>,<div class="el" id="l3" data-type="subheadline">“</div>,<div class="el" id="l4" data-type="headline">نعمل بكل عزم وإصرار على تحقيق رؤية التحول والتطوير المستمر</div>,<div class="el" id="l5" data-type="subheadline">— تصريح رسمي رفيع المستوى</div>,<div class="el" id="l6" data-type="footer"></div>
   </div>
   <div class="bumper-scene" id="bumperScene">
     <div id="bAcc"></div>
@@ -119,7 +113,7 @@ html, body { width:1080px; height:1920px; overflow:hidden; margin:0; padding:0; 
     var setWords = function(sel, val) {
       var el = document.querySelector(sel);
       if (el && val) {
-        var words = String(val).trim().split(/\s+/);
+        var words = String(val).trim().split(/s+/);
         el.innerHTML = words.map(function(w){ return '<span class="w" style="display:inline-block">' + w + '</span>'; }).join(' ');
       }
     };
@@ -241,7 +235,7 @@ html, body { width:1080px; height:1920px; overflow:hidden; margin:0; padding:0; 
     if (vid && vid.src) {
       try {
         vid.pause();
-        if (vid.duration && !isNaN(vid.duration) && vid.duration > 0) vid.currentTime = timeInSeconds % vid.duration;
+        if (vid.duration && !isNaN(vid.duration)) vid.currentTime = timeInSeconds % vid.duration;
         else vid.currentTime = timeInSeconds;
       } catch (e) {}
     }

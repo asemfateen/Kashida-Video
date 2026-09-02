@@ -268,31 +268,14 @@ _cached_playwright = None
 _browser_lock = threading.Lock()
 
 
-async def _get_or_launch_browser():
-    """Return a reusable Chromium instance, launching one if needed."""
-    global _cached_browser, _cached_playwright
-    with _browser_lock:
-        if _cached_browser:
-            try:
-                if _cached_browser.is_connected():
-                    return _cached_browser
-            except Exception:
-                pass
-            # Browser is dead — clean up
-            try:
-                if _cached_playwright:
-                    await _cached_playwright.stop()
-            except Exception:
-                pass
-            _cached_browser = None
-            _cached_playwright = None
-
-        _cached_playwright = await async_playwright().start()
-        _cached_browser = await _cached_playwright.chromium.launch(
-            args=CHROMIUM_LOW_RAM_FLAGS,
-            headless=True,
-        )
-        return _cached_browser
+async def _launch_browser():
+    """Launch a Chromium instance and its async Playwright context."""
+    pw = await async_playwright().start()
+    browser = await pw.chromium.launch(
+        args=CHROMIUM_LOW_RAM_FLAGS,
+        headless=True,
+    )
+    return pw, browser
 
 
 def _encode_frames(frame_dir: str, fps: int, output_path: str, audio_source: str = None, duration: float = None):
@@ -461,12 +444,14 @@ async def render_video(task_id: str, json_data: dict, output_path: str,
             f"Reduce round count or durations."
         )
 
+    pw = None
     browser = None
+    context = None
     try:
         if progress_callback:
             progress_callback("STARTED", 0, "Launching browser...")
 
-        browser = await _get_or_launch_browser()
+        pw, browser = await _launch_browser()
         context = await browser.new_context(
             viewport={"width": width, "height": height},
             device_scale_factor=1,
@@ -604,11 +589,21 @@ async def render_video(task_id: str, json_data: dict, output_path: str,
         return output_path
 
     finally:
-        # Close the per-render context (not the browser — it's cached).
-        try:
-            await context.close()
-        except Exception:
-            pass
+        if context:
+            try:
+                await context.close()
+            except Exception:
+                pass
+        if browser:
+            try:
+                await browser.close()
+            except Exception:
+                pass
+        if pw:
+            try:
+                await pw.stop()
+            except Exception:
+                pass
         if os.path.exists(frame_root):
             shutil.rmtree(frame_root, ignore_errors=True)
             print(f"[{task_id}] Cleaned up frame directory")

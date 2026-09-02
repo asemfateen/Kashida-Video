@@ -1,0 +1,261 @@
+{
+  "meta": {
+    "id": "t97x9l17",
+    "name": "New Template",
+    "description": "",
+    "version": 1,
+    "created_at": 1788338978.75746,
+    "updated_at": 1788338978.75746,
+    "tags": []
+  },
+  "data": {
+    "id": "t97x9l17",
+    "name": "New Template",
+    "description": "",
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "duration": 5,
+    "backgroundColor": "#0b0b0f",
+    "accentColor": "#e63946",
+    "layers": [
+      {
+        "id": "3xocwawk",
+        "name": "Background media",
+        "type": "background",
+        "visible": true,
+        "locked": false,
+        "x": 0,
+        "y": 0,
+        "width": 100,
+        "textAlign": "center",
+        "fontSize": 72,
+        "fontWeight": 700,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "none",
+          "duration": 0,
+          "delay": 0,
+          "easing": "linear"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "height": 100,
+        "overlayOpacity": 0.55
+      },
+      {
+        "id": "uf6mxsnm",
+        "name": "Logo",
+        "type": "logo",
+        "visible": true,
+        "locked": false,
+        "x": 8,
+        "y": 5,
+        "width": 0,
+        "textAlign": "start",
+        "fontSize": 64,
+        "fontWeight": 700,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.6,
+          "delay": 0,
+          "easing": "ease-out"
+        },
+        "persistentStyle": true,
+        "animateFirstRoundOnly": true,
+        "text": "KASHIDA"
+      },
+      {
+        "id": "p0glwbq6",
+        "name": "Accent bar",
+        "type": "accentBar",
+        "visible": true,
+        "locked": false,
+        "x": 92,
+        "y": 0,
+        "width": 1.5,
+        "textAlign": "start",
+        "fontSize": 72,
+        "fontWeight": 700,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.6,
+          "delay": 0,
+          "easing": "ease-out"
+        },
+        "persistentStyle": true,
+        "animateFirstRoundOnly": true,
+        "backgroundColor": "#e63946",
+        "height": 100
+      },
+      {
+        "id": "zcjhe7xa",
+        "name": "Badge / Label",
+        "type": "label",
+        "visible": true,
+        "locked": false,
+        "x": 8,
+        "y": 84,
+        "width": 0,
+        "textAlign": "start",
+        "fontSize": 72,
+        "fontWeight": 700,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.6,
+          "delay": 0,
+          "easing": "ease-out"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "labelAr": "NEWS",
+        "labelEn": "ALERT",
+        "backgroundColor": "#e63946"
+      },
+      {
+        "id": "xrveqnhc",
+        "name": "Headline",
+        "type": "headline",
+        "visible": true,
+        "locked": false,
+        "x": 8,
+        "y": 62,
+        "width": 84,
+        "textAlign": "center",
+        "fontSize": 72,
+        "fontWeight": 700,
+        "color": "#ffffff",
+        "opacity": 1,
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.6,
+          "delay": 0,
+          "easing": "ease-out"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "text": "Main Headline",
+        "textShadow": "none",
+        "borderRadius": 16,
+        "backgroundColor": "#E63946"
+      },
+      {
+        "id": "j4g4r9kf",
+        "name": "Subheadline",
+        "type": "subheadline",
+        "visible": true,
+        "locked": false,
+        "x": 8,
+        "y": 74,
+        "width": 84,
+        "textAlign": "center",
+        "fontSize": 38,
+        "fontWeight": 400,
+        "color": "rgba(255,255,255,0.65)",
+        "opacity": 1,
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.6,
+          "delay": 0,
+          "easing": "ease-out"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "text": "Secondary details appear here"
+      },
+      {
+        "id": "w67dkomj",
+        "name": "Timestamp",
+        "type": "timestamp",
+        "visible": true,
+        "locked": false,
+        "x": 10,
+        "y": 91,
+        "width": 0,
+        "textAlign": "start",
+        "fontSize": 22,
+        "fontWeight": 400,
+        "color": "rgba(255,255,255,0.3)",
+        "opacity": 1,
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.6,
+          "delay": 0,
+          "easing": "ease-out"
+        },
+        "persistentStyle": false,
+        "animateFirstRoundOnly": false,
+        "text": ""
+      },
+      {
+        "id": "1lc55nah",
+        "name": "Footer",
+        "type": "footer",
+        "visible": true,
+        "locked": false,
+        "x": 8,
+        "y": 95.5,
+        "width": 0,
+        "textAlign": "start",
+        "fontSize": 24,
+        "fontWeight": 400,
+        "color": "rgba(255,255,255,0.35)",
+        "opacity": 1,
+        "animation": {
+          "type": "fade-in",
+          "duration": 0.6,
+          "delay": 0,
+          "easing": "ease-out"
+        },
+        "persistentStyle": true,
+        "animateFirstRoundOnly": true,
+        "text": "kashida.io"
+      }
+    ],
+    "rounds": [
+      {
+        "id": "447wpvd5",
+        "name": "First Round",
+        "headline": "*عاجل* Main Headline",
+        "subheadline": "Secondary details appear here",
+        "labelAr": "NEWS",
+        "labelEn": "ALERT",
+        "timestamp": "",
+        "accentColor": "#e63946",
+        "backgroundColor": "#0b0b0f",
+        "overlayOpacity": 0.55,
+        "duration": 0
+      }
+    ],
+    "bumper": {
+      "enabled": false,
+      "showIntro": true,
+      "showInterstitial": true,
+      "showOutro": true,
+      "duration": 2,
+      "backgroundColor": "#0b0b0f",
+      "accentColor": "#e63946",
+      "logoText": "KASHIDA",
+      "slogan": "كشيدة · kashida.io",
+      "animation": {
+        "type": "zoom-in",
+        "duration": 0.6,
+        "delay": 0,
+        "easing": "ease-out"
+      },
+      "animationOut": {
+        "type": "fade-out",
+        "duration": 0.5,
+        "delay": 0,
+        "easing": "ease-out"
+      }
+    }
+  }
+}

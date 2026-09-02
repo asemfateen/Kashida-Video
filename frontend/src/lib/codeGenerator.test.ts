@@ -135,40 +135,14 @@ describe('generateTemplateHTML — bumper scene', () => {
 
 describe('generateTemplateHTML — all starter templates emit bumper and contract compliance', () => {
   it('generates compliant HTML and JSON for all starter broadcast templates', async () => {
-    const fs = await import('node:fs')
-    const path = await import('node:path')
-    const { fileURLToPath } = await import('node:url')
     const { STARTER_TEMPLATES } = await import('./starterTemplates')
 
-    const currentDir = path.dirname(fileURLToPath(import.meta.url))
-    const outDir = path.resolve(currentDir, '../../../backend/templates')
-    const dataDir = path.resolve(currentDir, '../../../backend/data/templates')
-
     for (const tmpl of STARTER_TEMPLATES) {
-      const { html, filename } = generateTemplateHTML(tmpl)
+      const { html } = generateTemplateHTML(tmpl)
       expect(html).toContain('window.loadNewsData')
       expect(html).toContain('window.seekToFrame')
       expect(html).toContain('bumperScene')
       expect(html).toContain('window.bumperTimeline')
-
-      const targetPath = path.join(outDir, filename)
-      fs.writeFileSync(targetPath, html, 'utf-8')
-      expect(fs.existsSync(targetPath)).toBe(true)
-
-      const jsonPath = path.join(dataDir, `${tmpl.id}.json`)
-      const record = {
-        meta: {
-          id: tmpl.id,
-          name: tmpl.name,
-          description: tmpl.description,
-          version: 1,
-          created_at: Date.now() / 1000,
-          updated_at: Date.now() / 1000,
-          tags: ['starter', 'broadcast'],
-        },
-        data: tmpl,
-      }
-      fs.writeFileSync(jsonPath, JSON.stringify(record, null, 2), 'utf-8')
     }
   })
 })

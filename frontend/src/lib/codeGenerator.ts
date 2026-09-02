@@ -207,25 +207,26 @@ export function generateTemplateHTML(model: TemplateModel): GeneratedTemplate {
     if (l.type === 'background') return
     const id = `#l${i}`
     if (l.animation.type !== 'none') {
+      const rotProp = l.rotation ? `, rotation: ${l.rotation}` : ''
       if (l.animation.type === 'word-stagger') {
         tlCalls.push(
           `  tl.fromTo('${id} .w', { opacity: 0, y: 25 }, { opacity: 1, y: 0, duration: ${l.animation.duration}, ease: '${GSAP_EASING[l.animation.easing]}', stagger: ${l.animation.stagger ?? 0.08} }, ${l.animation.delay});`
         )
       } else if (l.animation.type === 'wipe-rtl') {
         tlCalls.push(
-          `  tl.fromTo('${id}', { opacity: 0, scaleX: 0, transformOrigin: 'right center' }, { opacity: ${l.opacity}, scaleX: 1, duration: ${l.animation.duration}, ease: '${GSAP_EASING[l.animation.easing]}' }, ${l.animation.delay});`
+          `  tl.fromTo('${id}', { opacity: 0, scaleX: 0, transformOrigin: 'right center'${rotProp} }, { opacity: ${l.opacity}, scaleX: 1${rotProp}, duration: ${l.animation.duration}, ease: '${GSAP_EASING[l.animation.easing]}' }, ${l.animation.delay});`
         )
       } else if (l.animation.type === 'pop-bounce') {
         tlCalls.push(
-          `  tl.fromTo('${id}', { opacity: 0, scale: 0.4 }, { opacity: ${l.opacity}, scale: 1, duration: ${l.animation.duration}, ease: 'back.out(2)' }, ${l.animation.delay});`
+          `  tl.fromTo('${id}', { opacity: 0, scale: 0.4${rotProp} }, { opacity: ${l.opacity}, scale: 1${rotProp}, duration: ${l.animation.duration}, ease: 'back.out(2)' }, ${l.animation.delay});`
         )
       } else if (l.animation.type === 'flip-up') {
         tlCalls.push(
-          `  tl.fromTo('${id}', { opacity: 0, y: 35, rotationX: 55, transformPerspective: 600 }, { opacity: ${l.opacity}, y: 0, rotationX: 0, duration: ${l.animation.duration}, ease: '${GSAP_EASING[l.animation.easing]}' }, ${l.animation.delay});`
+          `  tl.fromTo('${id}', { opacity: 0, y: 35, rotationX: 55, transformPerspective: 600${rotProp} }, { opacity: ${l.opacity}, y: 0, rotationX: 0${rotProp}, duration: ${l.animation.duration}, ease: '${GSAP_EASING[l.animation.easing]}' }, ${l.animation.delay});`
         )
       } else if (l.animation.type === 'blur-reveal') {
         tlCalls.push(
-          `  tl.fromTo('${id}', { opacity: 0, scale: 1.08, filter: 'blur(10px)' }, { opacity: ${l.opacity}, scale: 1, filter: 'blur(0px)', duration: ${l.animation.duration}, ease: '${GSAP_EASING[l.animation.easing]}' }, ${l.animation.delay});`
+          `  tl.fromTo('${id}', { opacity: 0, scale: 1.08, filter: 'blur(10px)'${rotProp} }, { opacity: ${l.opacity}, scale: 1, filter: 'blur(0px)'${rotProp}, duration: ${l.animation.duration}, ease: '${GSAP_EASING[l.animation.easing]}' }, ${l.animation.delay});`
         )
       } else {
         const from = gsapFrom(l.animation.type)
@@ -233,7 +234,7 @@ export function generateTemplateHTML(model: TemplateModel): GeneratedTemplate {
           .map((k) => `${k}: ${from[k as keyof typeof from]}`)
           .join(', ')
         tlCalls.push(
-          `  tl.fromTo('${id}', { ${fromStr} }, { opacity: ${l.opacity}, x: 0, y: 0, scale: 1, duration: ${l.animation.duration}, ease: '${GSAP_EASING[l.animation.easing]}' }, ${l.animation.delay});`
+          `  tl.fromTo('${id}', { ${fromStr}${rotProp} }, { opacity: ${l.opacity}, x: 0, y: 0, scale: 1${rotProp}, duration: ${l.animation.duration}, ease: '${GSAP_EASING[l.animation.easing]}' }, ${l.animation.delay});`
         )
       }
     }

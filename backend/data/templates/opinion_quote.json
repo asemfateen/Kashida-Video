@@ -4,8 +4,8 @@
     "name": "اقتباس وتصريح · Quote & Statement",
     "description": "قالب اقتباس التصريحات الرسمية ببطاقة زجاجية فاخرة",
     "version": 1,
-    "created_at": 1788174881.055,
-    "updated_at": 1788174881.055,
+    "created_at": 1788337499.546,
+    "updated_at": 1788337499.546,
     "tags": [
       "starter",
       "broadcast"
@@ -46,7 +46,7 @@
     },
     "layers": [
       {
-        "id": "ypi1wctu",
+        "id": "ljle1rlh",
         "name": "Background media",
         "type": "background",
         "visible": true,
@@ -71,7 +71,7 @@
         "overlayOpacity": 0.65
       },
       {
-        "id": "ifocjny6",
+        "id": "tzrhy3h7",
         "name": "Quote Badge",
         "type": "label",
         "visible": true,
@@ -97,7 +97,7 @@
         "backgroundColor": "#e63946"
       },
       {
-        "id": "dg4hwepj",
+        "id": "q7l7yw9x",
         "name": "Brand Logo",
         "type": "logo",
         "visible": true,
@@ -121,7 +121,7 @@
         "text": "كشيدة"
       },
       {
-        "id": "jxygx5t5",
+        "id": "undofmn7",
         "name": "Frosted Quote Card",
         "type": "card",
         "visible": true,
@@ -149,7 +149,7 @@
         "height": 520
       },
       {
-        "id": "d7jhclmk",
+        "id": "htt2vgwj",
         "name": "Quote Icon",
         "type": "subheadline",
         "visible": true,
@@ -173,7 +173,7 @@
         "text": "“"
       },
       {
-        "id": "eubp2c2i",
+        "id": "j8q373kt",
         "name": "Quoted Statement",
         "type": "headline",
         "visible": true,
@@ -197,7 +197,7 @@
         "text": "نعمل بكل عزم وإصرار على تحقيق رؤية التحول والتطوير المستمر"
       },
       {
-        "id": "kf28rmec",
+        "id": "g4ro01r2",
         "name": "Speaker Attribution",
         "type": "subheadline",
         "visible": true,
@@ -221,7 +221,7 @@
         "text": "— تصريح رسمي رفيع المستوى"
       },
       {
-        "id": "bo0d4yo3",
+        "id": "ewfg0heh",
         "name": "Footer Bar",
         "type": "footer",
         "visible": true,
@@ -247,7 +247,7 @@
     ],
     "rounds": [
       {
-        "id": "wovmyxnk",
+        "id": "alfz22ow",
         "name": "First Round",
         "headline": "نعمل بكل عزم وإصرار على تحقيق رؤية التحول والتطوير المستمر",
         "subheadline": "— تصريح رسمي رفيع المستوى",

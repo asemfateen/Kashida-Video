@@ -137,7 +137,21 @@ const LayerView = memo(function LayerView({
       registry.delete(layer.id)
       return
     }
-    const kfs = waaiKeyframes(layer.animation.type)
+
+    const baseTransforms: string[] = []
+    if (layer.rotation) baseTransforms.push(`rotate(${layer.rotation}deg)`)
+    if (layer.skewX) baseTransforms.push(`skewX(${layer.skewX}deg)`)
+    if (layer.skewY) baseTransforms.push(`skewY(${layer.skewY}deg)`)
+    const baseStr = baseTransforms.join(' ')
+
+    const rawKfs = waaiKeyframes(layer.animation.type)
+    const kfs = baseStr
+      ? rawKfs.map((kf) => ({
+          ...kf,
+          transform: kf.transform ? `${baseStr} ${kf.transform}` : baseStr,
+        }))
+      : rawKfs
+
     const anim = el.animate(kfs, {
       duration: Math.max(10, layer.animation.duration * 1000),
       easing: CSS_EASING[layer.animation.easing],
@@ -177,6 +191,9 @@ const LayerView = memo(function LayerView({
     layer.animation.delay,
     layer.animation.easing,
     layer.animateFirstRoundOnly,
+    layer.rotation,
+    layer.skewX,
+    layer.skewY,
     playheadRef,
     registry,
   ])

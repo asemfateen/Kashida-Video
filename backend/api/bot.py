@@ -97,6 +97,9 @@ class _TTLStore:
     def __len__(self):
         return len(self._data)
 
+    def clear(self):
+        self._data.clear()
+
 
 USER_SESSIONS = _TTLStore(max_size=500, ttl=7200)
 USER_TEMPLATES = _TTLStore(max_size=1000, ttl=86400)
